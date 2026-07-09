@@ -34,3 +34,14 @@ body {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}

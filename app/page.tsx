@@ -3,8 +3,8 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="flex justify-center bg-white">
-      <section className="relative w-full max-w-[403px] h-[874px] overflow-hidden bg-white">
+    <main className="flex min-h-screen justify-center bg-white">
+      <section className="relative h-[874px] w-full max-w-[403px] overflow-hidden bg-white">
         <Image
           src="/images/landing/background.svg"
           alt=""
