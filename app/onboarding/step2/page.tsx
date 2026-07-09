@@ -74,8 +74,8 @@ export default function Step2Page() {
   };
 
   return (
-    <main className="flex min-h-screen justify-center bg-white">
-      <section className="relative h-[874px] w-full max-w-[403px] overflow-hidden bg-white">
+    <main className="flex justify-center bg-white">
+      <section className="relative h-[874px] w-full max-w-[402px] overflow-hidden bg-white">
         <button
           onClick={() => router.back()}
           className="absolute left-[28px] top-[81px] z-40 flex h-[20px] w-[20px] cursor-pointer items-center justify-center transition-transform active:scale-[0.98]"
