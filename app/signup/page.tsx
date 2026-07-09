@@ -31,8 +31,8 @@ export default function EmailSignupPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-white">
-      <section className="relative h-[874px] w-[403px] overflow-hidden bg-white">
+    <main className="flex justify-center bg-white">
+      <section className="relative w-full max-w-[403px] h-[874px] overflow-hidden bg-white">
         <button
           onClick={() => router.back()}
           className="absolute left-[28px] top-[81px] z-20 flex h-[20px] w-[20px] cursor-pointer items-center justify-center transition-transform active:scale-[0.98]"

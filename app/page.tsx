@@ -3,8 +3,8 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-white">
-      <section className="relative h-[874px] w-[403px] overflow-hidden bg-white">
+    <main className="flex justify-center bg-white">
+      <section className="relative w-full max-w-[403px] h-[874px] overflow-hidden bg-white">
         <Image
           src="/images/landing/background.svg"
           alt=""
@@ -42,7 +42,7 @@ export default function Home() {
 
         <Link
           href="/onboarding/books"
-          className="absolute left-[14px] top-[658px] flex h-[59px] w-[374px] items-center justify-center rounded-[8px] bg-[#FFBA1A] text-[16px] font-normal text-white transition-transform active:scale-[0.98]"
+          className="absolute left-[14px] top-[658px] flex h-[59px] w-[374px] cursor-pointer items-center justify-center rounded-[8px] bg-[#FFBA1A] text-[16px] font-normal text-white transition-transform active:scale-[0.98]"
         >
           시작하기
         </Link>
