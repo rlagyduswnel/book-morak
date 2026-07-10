@@ -3,53 +3,10 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
-type Book = {
-  isbn13: string;
-  title: string;
-  author: string;
-  genre: string;
-  cover: string;
-};
-
-type User = {
-  nickname: string;
-  tag: string;
-  profileImage?: string | null;
-  followedBookIds?: string[];
-};
-
-function parseCSV(csv: string): Book[] {
-  const lines = csv.trim().split(/\r?\n/);
-  const headers = lines[0].split(",").map((h) => h.trim());
-
-  return lines.slice(1).map((line) => {
-    const values =
-      line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map((v) =>
-        v.replace(/^"|"$/g, "").trim()
-      ) ?? [];
-
-    const row: Record<string, string> = {};
-    headers.forEach((header, index) => {
-      row[header] = values[index] ?? "";
-    });
-
-    return {
-      isbn13: row.isbn13,
-      title: row.title,
-      author: row.author,
-      genre: row.genre,
-      cover: row.cover,
-    };
-  });
-}
-
-function formatDate(date: Date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}.${m}.${d}`;
-}
+import { Book } from "@/components/PostCard";
+import { parseCSV } from "@/lib/parseCSV";
+import { supabase } from "@/lib/supabaseClient";
+import { createPost } from "@/lib/posts";
 
 export default function WritePage() {
   const router = useRouter();
@@ -59,8 +16,9 @@ export default function WritePage() {
   const [content, setContent] = useState("");
   const [showExitModal, setShowExitModal] = useState(false);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const isDirty = rating > 0 || content.trim().length > 0;
-  const canSubmit = rating >= 1 && content.trim().length >= 30;
+  const canSubmit = rating >= 1 && content.trim().length >= 30 && !isSubmitting;
 
   useEffect(() => {
     const selectedBookId = localStorage.getItem("selectedWriteBookId");
@@ -87,39 +45,32 @@ export default function WritePage() {
     setContent(value.slice(0, 1000));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!canSubmit || !book) return;
 
-    const user: User = JSON.parse(
-      localStorage.getItem("bookmorakUser") ?? "{}"
-    );
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    const savedPosts = JSON.parse(
-      localStorage.getItem("bookmorakPosts") ?? "[]"
-    );
+    if (!user) {
+      router.push("/login");
+      return;
+    }
 
-    const now = new Date();
+    setIsSubmitting(true);
 
-    const newPost = {
-      id: `post-${Date.now()}`,
-      bookId: book.isbn13,
-      authorName: user.nickname ?? "책모락이",
-      authorImage: user.profileImage ?? null,
-      rating,
-      content: content.trim(),
-      likeCount: 0,
-      commentCount: 0,
-      date: formatDate(now),
-      createdAt: now.toISOString(),
-      isMine: true,
-    };
+    try {
+      await createPost({
+        userId: user.id,
+        bookId: book.isbn13,
+        rating,
+        content: content.trim(),
+      });
 
-    localStorage.setItem(
-      "bookmorakPosts",
-      JSON.stringify([newPost, ...savedPosts])
-    );
-
-    router.push("/home");
+      router.push("/home");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -240,7 +191,7 @@ export default function WritePage() {
               : "cursor-not-allowed bg-[#9A9A9A]"
           }`}
         >
-          등록하기
+          {isSubmitting ? "등록 중..." : "등록하기"}
         </button>
 
         {showExitModal && (

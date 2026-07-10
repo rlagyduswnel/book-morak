@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { likePost, unlikePost } from "@/lib/likes";
+import { deletePost } from "@/lib/posts";
 
 export type Book = {
   isbn13: string;
@@ -29,6 +31,10 @@ export type Post = {
 type PostCardProps = {
   post: Post;
   book: Book;
+  /** 현재 로그인된 계정의 id. 좋아요/삭제 처리에 필요해요. */
+  currentUserId?: string | null;
+  /** 이 계정이 이 게시글을 이미 좋아요 눌렀는지 (부모에서 미리 조회해 전달) */
+  initiallyLiked?: boolean;
   onDelete?: (postId: string) => void;
   /**
    * true(기본값): 홈 등에서 쓰는 완전 인터랙티브 카드
@@ -53,37 +59,51 @@ function truncateContent(content: string) {
 export default function PostCard({
   post,
   book,
+  currentUserId,
+  initiallyLiked = false,
   onDelete,
   interactive = true,
 }: PostCardProps) {
   const router = useRouter();
 
-  const [liked, setLiked] = useState(false);
+  const [liked, setLiked] = useState(initiallyLiked);
+  const [likeCount, setLikeCount] = useState(post.likeCount);
   const [menuOpened, setMenuOpened] = useState(false);
 
-  const displayLikeCount = liked
-    ? post.likeCount + 1
-    : post.likeCount;
+  const handleToggleLike = async () => {
+    if (!currentUserId) return;
+
+    const nextLiked = !liked;
+    const nextLikeCount = likeCount + (nextLiked ? 1 : -1);
+
+    setLiked(nextLiked);
+    setLikeCount(nextLikeCount);
+
+    try {
+      if (nextLiked) {
+        await likePost(currentUserId, post.id);
+      } else {
+        await unlikePost(currentUserId, post.id);
+      }
+    } catch {
+      // 실패하면 화면 상태를 원래대로 되돌려요.
+      setLiked(!nextLiked);
+      setLikeCount(likeCount);
+    }
+  };
 
   const shortenedContent = truncateContent(post.content);
   const isLongContent = post.content.length >= 151;
 
-  const handleDelete = () => {
-    const savedPosts: Post[] = JSON.parse(
-      localStorage.getItem("bookmorakPosts") ?? "[]"
-    );
-
-    const nextPosts = savedPosts.filter(
-      (savedPost) => savedPost.id !== post.id
-    );
-
-    localStorage.setItem(
-      "bookmorakPosts",
-      JSON.stringify(nextPosts)
-    );
-
+  const handleDelete = async () => {
     setMenuOpened(false);
-    onDelete?.(post.id);
+
+    try {
+      await deletePost(post.id);
+      onDelete?.(post.id);
+    } catch {
+      // 삭제 실패 시 별도 처리 없이 메뉴만 닫아요.
+    }
   };
 
   return (
@@ -234,7 +254,7 @@ export default function PostCard({
         {interactive ? (
           <button
             type="button"
-            onClick={() => setLiked((prev) => !prev)}
+            onClick={handleToggleLike}
             className="absolute left-0 top-1/2 flex -translate-y-1/2 cursor-pointer items-center transition-transform active:scale-[0.98]"
           >
             <Image
@@ -259,7 +279,7 @@ export default function PostCard({
         )}
 
         <p className="absolute left-[17px] top-1/2 -translate-y-1/2 text-[11px] font-normal text-[#9A9A9A]">
-          {formatCount(displayLikeCount)}
+          {formatCount(likeCount)}
         </p>
 
         <button

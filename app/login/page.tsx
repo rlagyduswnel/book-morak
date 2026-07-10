@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { signInWithEmail } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,22 +15,19 @@ export default function LoginPage() {
 
   const canLogin = email.trim().length > 0 && password.trim().length > 0;
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!canLogin) return;
 
-    const savedEmail = localStorage.getItem("bookmorakEmail");
-    const savedPassword = localStorage.getItem("bookmorakPassword");
-
-    if (email === savedEmail && password === savedPassword) {
+    try {
+      await signInWithEmail(email.trim(), password);
       router.push("/home");
-      return;
+    } catch {
+      setShowToast(true);
+
+      setTimeout(() => {
+        setShowToast(false);
+      }, 1800);
     }
-
-    setShowToast(true);
-
-    setTimeout(() => {
-      setShowToast(false);
-    }, 1800);
   };
 
   return (

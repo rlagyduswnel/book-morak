@@ -1,53 +1,32 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import PostCard, { Book, Post } from "@/components/PostCard";
-
-function parseCSV(csv: string): Book[] {
-  const lines = csv.trim().split(/\r?\n/);
-  const headers = lines[0].split(",").map((h) => h.trim());
-
-  return lines.slice(1).map((line) => {
-    const values =
-      line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map((v) =>
-        v.replace(/^"|"$/g, "").trim()
-      ) ?? [];
-
-    const row: Record<string, string> = {};
-    headers.forEach((header, index) => {
-      row[header] = values[index] ?? "";
-    });
-
-    return {
-      isbn13: row.isbn13,
-      title: row.title,
-      author: row.author,
-      genre: row.genre,
-      cover: row.cover,
-    };
-  });
-}
+import { parseCSV } from "@/lib/parseCSV";
+import { fetchPostsByBookIds } from "@/lib/posts";
 
 export default function Step2Page() {
   const router = useRouter();
 
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBookIds, setSelectedBookIds] = useState<string[]>([]);
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [previewPosts, setPreviewPosts] = useState<Post[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("selectedBookIds");
-    if (saved) setSelectedBookIds(JSON.parse(saved));
-
-    const savedPosts = localStorage.getItem("bookmorakPosts");
-    if (savedPosts) setPosts(JSON.parse(savedPosts));
+    const bookIds: string[] = saved ? JSON.parse(saved) : [];
+    setSelectedBookIds(bookIds);
 
     fetch("/data/books.csv")
       .then((res) => res.text())
       .then((csv) => setBooks(parseCSV(csv)));
+
+    fetchPostsByBookIds(bookIds).then((posts) => {
+      setPreviewPosts(posts.slice(0, 2));
+    });
   }, []);
 
   const selectedBooks = books.filter((book) =>
@@ -60,16 +39,6 @@ export default function Step2Page() {
   const visibleRowCount = isExpanded ? Math.min(rowCount, 3) : 1;
   const bookAreaHeight = visibleRowCount * 155;
   const toggleButtonTop = 198 + bookAreaHeight;
-
-  const previewPosts = useMemo(() => {
-    return posts
-      .filter((post) => selectedBookIds.includes(post.bookId))
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      )
-      .slice(0, 2);
-  }, [posts, selectedBookIds]);
 
   const getBook = (bookId: string) => {
     return books.find((book) => book.isbn13 === bookId);

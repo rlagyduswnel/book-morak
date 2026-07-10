@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { signUpWithEmail } from "@/lib/auth";
+import { followBooks } from "@/lib/follows";
 
 const adjectives = ["똑똑한", "귀여운", "밝은", "수줍은", "상냥한"];
 const nouns = ["나무늘보", "고양이", "강아지", "티라노", "프린세스", "드래곤", "흑염룡", "프린스", "곰돌이", "독서광"];
@@ -30,6 +32,8 @@ export default function CreateAccountPage() {
   const [passwordConfirm, setPasswordConfirm] = useState("");
 
  const [recommendedNickname, setRecommendedNickname] = useState("");
+ const [isSubmitting, setIsSubmitting] = useState(false);
+ const [errorMessage, setErrorMessage] = useState("");
 
 useEffect(() => {
   setRecommendedNickname(makeRandomNickname());
@@ -40,7 +44,7 @@ useEffect(() => {
   password.trim().length > 0 &&
   password === passwordConfirm;
 
-  const canCreateAccount = isPasswordMatched;
+  const canCreateAccount = isPasswordMatched && !isSubmitting;
 
   const handleNicknameChange = (value: string) => {
     const onlyKorean = value.replace(/[^ㄱ-ㅎㅏ-ㅣ가-힣]/g, "");
@@ -59,29 +63,39 @@ useEffect(() => {
     reader.readAsDataURL(file);
   };
 
-  const handleCreateAccount = () => {
+  const handleCreateAccount = async () => {
   if (!canCreateAccount) return;
 
-  const signupEmail = localStorage.getItem("bookmorakSignupEmail") ?? "";
+  setIsSubmitting(true);
+  setErrorMessage("");
 
-  const selectedBookIds = JSON.parse(
-    localStorage.getItem("selectedBookIds") ?? "[]"
-  );
+  try {
+    const signupEmail = localStorage.getItem("bookmorakSignupEmail") ?? "";
 
-  localStorage.setItem("bookmorakEmail", signupEmail);
-  localStorage.setItem("bookmorakPassword", password);
+    const selectedBookIds: string[] = JSON.parse(
+      localStorage.getItem("selectedBookIds") ?? "[]"
+    );
 
-  localStorage.setItem(
-    "bookmorakUser",
-    JSON.stringify({
+    const user = await signUpWithEmail({
+      email: signupEmail,
+      password,
       nickname: finalNickname,
       tag,
       profileImage,
-      followedBookIds: selectedBookIds,
-    })
-  );
+    });
 
-  router.push("/home");
+    await followBooks(user.id, selectedBookIds);
+
+    router.push("/home");
+  } catch (error) {
+    setErrorMessage(
+      error instanceof Error
+        ? error.message
+        : "계정 생성에 실패했습니다. 다시 시도해 주세요."
+    );
+  } finally {
+    setIsSubmitting(false);
+  }
 };
 
   return (
@@ -189,6 +203,12 @@ useEffect(() => {
           </p>
         </div>
 
+        {errorMessage && (
+          <p className="absolute left-[14px] top-[770px] w-[374px] text-center text-[12px] font-normal text-red-500">
+            {errorMessage}
+          </p>
+        )}
+
         <button
           disabled={!canCreateAccount}
           onClick={handleCreateAccount}
@@ -198,7 +218,7 @@ useEffect(() => {
               : "cursor-not-allowed bg-[#9A9A9A]"
           }`}
         >
-          계정 생성하기
+          {isSubmitting ? "계정 생성 중..." : "계정 생성하기"}
         </button>
       </section>
     </main>

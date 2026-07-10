@@ -9,26 +9,52 @@ export default function EmailSignupPage() {
 
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [showDuplicateToast, setShowDuplicateToast] = useState(false);
 
   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  const handleSubmit = () => {
-    if (!isValidEmail) return;
+  const handleSubmit = async () => {
+    if (!isValidEmail || isChecking) return;
 
-    if (!sent) {
-      setSent(true);
-      setShowToast(true);
+    setIsChecking(true);
 
-      setTimeout(() => {
-        setShowToast(false);
-      }, 1800);
+    try {
+      const response = await fetch("/api/check-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
 
-      return;
+      const result = await response.json();
+
+      if (result.exists) {
+        setShowDuplicateToast(true);
+
+        setTimeout(() => {
+          setShowDuplicateToast(false);
+        }, 1800);
+
+        return;
+      }
+
+      if (!sent) {
+        setSent(true);
+        setShowToast(true);
+
+        setTimeout(() => {
+          setShowToast(false);
+        }, 1800);
+
+        return;
+      }
+
+      localStorage.setItem("bookmorakSignupEmail", email);
+      router.push("/signup/create");
+    } finally {
+      setIsChecking(false);
     }
-
-    localStorage.setItem("bookmorakSignupEmail", email);
-    router.push("/signup/create");
   };
 
   return (
@@ -87,11 +113,17 @@ export default function EmailSignupPage() {
           </div>
         )}
 
+        {showDuplicateToast && (
+          <div className="absolute left-[24px] top-[724px] z-30 flex h-[48px] w-[355px] items-center justify-center rounded-[24px] bg-black/75 text-[12px] text-white">
+            이미 가입된 이메일이에요. 다른 이메일을 입력해 주세요.
+          </div>
+        )}
+
         <button
-          disabled={!isValidEmail}
+          disabled={!isValidEmail || isChecking}
           onClick={handleSubmit}
           className={`absolute left-[14px] top-[795px] flex h-[52px] w-[374px] items-center justify-center rounded-[8px] text-[16px] font-bold text-white transition-transform ${
-            isValidEmail
+            isValidEmail && !isChecking
               ? "cursor-pointer bg-[#FFBA1A] active:scale-[0.98]"
               : "cursor-not-allowed bg-[#9A9A9A]"
           }`}

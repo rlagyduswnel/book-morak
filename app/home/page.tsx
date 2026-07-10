@@ -1,77 +1,72 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import PostCard, {
-  Book,
-  Post,
-} from "@/components/PostCard";
+import PostCard, { Book, Post } from "@/components/PostCard";
 import { parseCSV } from "@/lib/parseCSV";
+import { supabase } from "@/lib/supabaseClient";
+import { fetchFollowedBookIds } from "@/lib/follows";
+import { fetchPostsByBookIds } from "@/lib/posts";
+import { fetchLikedPostIds } from "@/lib/likes";
 
 export default function HomePage() {
   const router = useRouter();
 
   const [books, setBooks] = useState<Book[]>([]);
-  const [selectedBookIds, setSelectedBookIds] =
-    useState<string[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [likedPostIds, setLikedPostIds] = useState<string[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("bookmorakUser");
+    let isMounted = true;
 
-    if (savedUser) {
-      const user = JSON.parse(savedUser);
+    const load = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      setSelectedBookIds(
-        user.followedBookIds ??
-          JSON.parse(
-            localStorage.getItem("selectedBookIds") ?? "[]"
-          )
+      if (!user) {
+        router.replace("/login");
+        return;
+      }
+
+      if (!isMounted) return;
+      setUserId(user.id);
+
+      const [followedBookIds, likedIds, csv] = await Promise.all([
+        fetchFollowedBookIds(user.id),
+        fetchLikedPostIds(user.id),
+        fetch("/data/books.csv").then((res) => res.text()),
+      ]);
+
+      if (!isMounted) return;
+
+      setBooks(parseCSV(csv));
+      setLikedPostIds(likedIds);
+
+      const fetchedPosts = await fetchPostsByBookIds(
+        followedBookIds,
+        user.id
       );
-    } else {
-      setSelectedBookIds(
-        JSON.parse(
-          localStorage.getItem("selectedBookIds") ?? "[]"
-        )
-      );
-    }
 
-    const savedPosts = localStorage.getItem("bookmorakPosts");
+      if (!isMounted) return;
+      setPosts(fetchedPosts);
+    };
 
-    if (savedPosts) {
-      setPosts(JSON.parse(savedPosts));
-    }
+    load();
 
-    fetch("/data/books.csv")
-      .then((response) => response.text())
-      .then((csv) => {
-        setBooks(parseCSV(csv));
-      });
-  }, []);
-
-  const filteredPosts = useMemo(() => {
-    return [...posts]
-      .filter((post) =>
-        selectedBookIds.includes(post.bookId)
-      )
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() -
-          new Date(a.createdAt).getTime()
-      );
-  }, [posts, selectedBookIds]);
+    return () => {
+      isMounted = false;
+    };
+  }, [router]);
 
   const getBook = (bookId: string) => {
-    return books.find(
-      (book) => book.isbn13 === bookId
-    );
+    return books.find((book) => book.isbn13 === bookId);
   };
 
   const handleDeletePost = (postId: string) => {
-    setPosts((prev) =>
-      prev.filter((post) => post.id !== postId)
-    );
+    setPosts((prev) => prev.filter((post) => post.id !== postId));
   };
 
   return (
@@ -104,7 +99,7 @@ export default function HomePage() {
 
         <section className="hide-scrollbar absolute left-[14px] top-[115px] h-[678px] w-[374px] overflow-y-auto overflow-x-hidden">
           <div className="flex flex-col gap-[15px]">
-            {filteredPosts.map((post) => {
+            {posts.map((post) => {
               const book = getBook(post.bookId);
 
               if (!book) return null;
@@ -114,6 +109,8 @@ export default function HomePage() {
                   key={post.id}
                   post={post}
                   book={book}
+                  currentUserId={userId}
+                  initiallyLiked={likedPostIds.includes(post.id)}
                   onDelete={handleDeletePost}
                 />
               );

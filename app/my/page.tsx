@@ -1,61 +1,74 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import PostCard, { Book, Post } from "@/components/PostCard";
 import { parseCSV } from "@/lib/parseCSV";
-
-const DEFAULT_BIO = "책 이야기가 모락모락 피어나는 곳";
-
-type BookmorakUser = {
-  nickname: string;
-  tag: string;
-  profileImage?: string | null;
-  bio?: string;
-  followedBookIds?: string[];
-};
+import { supabase } from "@/lib/supabaseClient";
+import { getCurrentProfile, type Profile } from "@/lib/auth";
+import { fetchFollowedBookIds } from "@/lib/follows";
+import { fetchMyPosts } from "@/lib/posts";
+import { fetchLikedPostIds } from "@/lib/likes";
 
 export default function MyPage() {
   const router = useRouter();
 
   const [books, setBooks] = useState<Book[]>([]);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [user, setUser] = useState<BookmorakUser | null>(null);
+  const [myPosts, setMyPosts] = useState<Post[]>([]);
+  const [likedPostIds, setLikedPostIds] = useState<string[]>([]);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [followingCount, setFollowingCount] = useState(0);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("bookmorakUser");
-    if (savedUser) setUser(JSON.parse(savedUser));
+    let isMounted = true;
 
-    const savedPosts = localStorage.getItem("bookmorakPosts");
-    if (savedPosts) setPosts(JSON.parse(savedPosts));
+    const load = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    fetch("/data/books.csv")
-      .then((res) => res.text())
-      .then((csv) => setBooks(parseCSV(csv)));
-  }, []);
+      if (!user) {
+        router.replace("/login");
+        return;
+      }
 
-  const myPosts = useMemo(() => {
-    return [...posts]
-      .filter((post) => post.isMine)
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-  }, [posts]);
+      const [currentProfile, followedBookIds, likedIds, csv, fetchedMyPosts] =
+        await Promise.all([
+          getCurrentProfile(),
+          fetchFollowedBookIds(user.id),
+          fetchLikedPostIds(user.id),
+          fetch("/data/books.csv").then((res) => res.text()),
+          fetchMyPosts(user.id),
+        ]);
+
+      if (!isMounted) return;
+
+      setProfile(currentProfile);
+      setFollowingCount(followedBookIds.length);
+      setLikedPostIds(likedIds);
+      setBooks(parseCSV(csv));
+      setMyPosts(fetchedMyPosts);
+    };
+
+    load();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [router]);
 
   const getBook = (bookId: string) => {
     return books.find((book) => book.isbn13 === bookId);
   };
 
   const handleDeletePost = (postId: string) => {
-    setPosts((prev) => prev.filter((post) => post.id !== postId));
+    setMyPosts((prev) => prev.filter((post) => post.id !== postId));
   };
 
-  const nickname = user?.nickname ?? "";
-  const tag = user?.tag ?? "";
-  const bio = user?.bio ?? DEFAULT_BIO;
-  const followingCount = user?.followedBookIds?.length ?? 0;
+  const nickname = profile?.nickname ?? "";
+  const tag = profile?.tag ?? "";
+  const bio = profile?.bio ?? "책 이야기가 모락모락 피어나는 곳";
   const postCount = myPosts.length;
 
   return (
@@ -69,16 +82,16 @@ export default function MyPage() {
 
           <button
             onClick={() => router.push("/settings")}
-            className="absolute bottom-1 right-[14px] h-[20px] w-[20px] cursor-pointer transition-transform active:scale-[0.98]"
+            className="absolute bottom-1 right-[14px] h-[25px] w-[25px] cursor-pointer transition-transform active:scale-[0.98]"
           >
-            <Image src="/images/my/set.svg" alt="" width={20} height={20} />
+            <Image src="/images/my/set.svg" alt="" width={25} height={25} />
           </button>
         </header>
 
         {/* 마이 정보 영역 */}
         <section className="absolute left-0 top-[115px] h-[146px] w-[402px] border-b border-[#E0E0E0] px-[8px] py-[15px]">
           <img
-            src={user?.profileImage || "/images/home/normal.svg"}
+            src={profile?.profileImage || "/images/home/normal.svg"}
             alt=""
             className="absolute left-0 top-0 h-[93px] w-[93px] rounded-full object-cover"
           />
@@ -137,6 +150,8 @@ export default function MyPage() {
                   key={post.id}
                   post={post}
                   book={book}
+                  currentUserId={profile?.id ?? null}
+                  initiallyLiked={likedPostIds.includes(post.id)}
                   onDelete={handleDeletePost}
                 />
               );

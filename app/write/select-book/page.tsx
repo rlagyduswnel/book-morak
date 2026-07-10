@@ -3,51 +3,17 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-
-type Book = {
-  isbn13: string;
-  title: string;
-  author: string;
-  genre: string;
-  cover: string;
-};
-
-type Post = {
-  id: string;
-  bookId: string;
-  rating: number;
-};
-
-function parseCSV(csv: string): Book[] {
-  const lines = csv.trim().split(/\r?\n/);
-  const headers = lines[0].split(",").map((h) => h.trim());
-
-  return lines.slice(1).map((line) => {
-    const values =
-      line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map((v) =>
-        v.replace(/^"|"$/g, "").trim()
-      ) ?? [];
-
-    const row: Record<string, string> = {};
-    headers.forEach((header, index) => {
-      row[header] = values[index] ?? "";
-    });
-
-    return {
-      isbn13: row.isbn13,
-      title: row.title,
-      author: row.author,
-      genre: row.genre,
-      cover: row.cover,
-    };
-  });
-}
+import { Book } from "@/components/PostCard";
+import { parseCSV } from "@/lib/parseCSV";
+import { fetchAverageRatingsByBook } from "@/lib/posts";
 
 export default function WriteBookSelectPage() {
   const router = useRouter();
 
   const [books, setBooks] = useState<Book[]>([]);
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [averageRatings, setAverageRatings] = useState<Record<string, number>>(
+    {}
+  );
   const [keyword, setKeyword] = useState("");
 
   useEffect(() => {
@@ -55,17 +21,12 @@ export default function WriteBookSelectPage() {
       .then((res) => res.text())
       .then((csv) => setBooks(parseCSV(csv)));
 
-    const savedPosts = localStorage.getItem("bookmorakPosts");
-    if (savedPosts) setPosts(JSON.parse(savedPosts));
+    fetchAverageRatingsByBook().then(setAverageRatings);
   }, []);
 
   const getAverageRating = (bookId: string) => {
-    const bookPosts = posts.filter((post) => post.bookId === bookId);
-
-    if (bookPosts.length === 0) return "0.0";
-
-    const sum = bookPosts.reduce((acc, post) => acc + post.rating, 0);
-    return (sum / bookPosts.length).toFixed(1);
+    const average = averageRatings[bookId];
+    return average ? average.toFixed(1) : "0.0";
   };
 
   const filteredBooks = useMemo(() => {
@@ -103,7 +64,7 @@ export default function WriteBookSelectPage() {
           </button>
 
           <h1
-            className="pointer-events-none absolute bottom-0 left-0 w-full text-center text-[18px] leading-[24px]"
+            className="pointer-events-none absolute bottom-0 left-0 w-full text-center text-[18px] leading-[24px] font-bold"
           >
             작성할 책 선택
           </h1>
