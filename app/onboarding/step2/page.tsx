@@ -3,28 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-
-type Book = {
-  isbn13: string;
-  title: string;
-  author: string;
-  genre: string;
-  cover: string;
-};
-
-type Post = {
-  id: string;
-  bookId: string;
-  authorName: string;
-  authorImage?: string;
-  rating: number;
-  content: string;
-  likeCount: number;
-  commentCount: number;
-  date: string;
-  createdAt: string;
-  isMine: boolean;
-};
+import PostCard, { Book, Post } from "@/components/PostCard";
 
 function parseCSV(csv: string): Book[] {
   const lines = csv.trim().split(/\r?\n/);
@@ -49,15 +28,6 @@ function parseCSV(csv: string): Book[] {
       cover: row.cover,
     };
   });
-}
-
-function formatCount(count: number) {
-  return count >= 100 ? "99+" : String(count);
-}
-
-function truncateContent(content: string) {
-  if (content.length < 151) return content;
-  return content.slice(0, 151);
 }
 
 export default function Step2Page() {
@@ -198,119 +168,13 @@ export default function Step2Page() {
             const book = getBook(post.bookId);
             if (!book) return null;
 
-            const shortened = truncateContent(post.content);
-            const isLong = post.content.length >= 151;
-
             return (
-              <article
+              <PostCard
                 key={post.id}
-                className="relative w-[374px] border-b border-[#E0E0E0] px-[5px] py-[10px]"
-              >
-                <button
-                  onClick={() => router.push(`/books/${book.isbn13}`)}
-                  className="relative h-[50px] w-full cursor-pointer rounded-[10px] border border-[#FFBA1A] text-left transition-transform active:scale-[0.98]"
-                >
-                  <img
-                    src={book.cover}
-                    alt={book.title}
-                    className="absolute left-[20px] top-1/2 h-[34px] w-[21px] -translate-y-1/2 object-cover"
-                  />
-
-                  <p className="absolute left-[51px] top-[8px] w-[250px] truncate text-[13.5px] font-normal text-black">
-                    {book.title}
-                  </p>
-
-                  <p className="absolute left-[51px] top-[27px] w-[250px] truncate text-[10px] font-normal text-[#9A9A9A]">
-                    {book.author}
-                  </p>
-
-                  <Image
-                    src="/images/home/next.svg"
-                    alt=""
-                    width={6.36}
-                    height={12.71}
-                    className="absolute right-[20px] top-1/2 -translate-y-1/2"
-                  />
-                </button>
-
-                <div className="relative mt-[10px] flex h-[22px] w-full items-center">
-                  <img
-                    src={post.authorImage || "/images/home/normal.svg"}
-                    alt=""
-                    className="h-[22px] w-[22px] rounded-full object-cover"
-                  />
-
-                  <span className="ml-[5px] text-[12px] font-normal text-black">
-                    {post.authorName}
-                  </span>
-
-                  <div className="ml-[5px] flex gap-[2px]">
-                    {Array.from({ length: 5 }).map((_, index) => (
-                      <Image
-                        key={index}
-                        src={
-                          index < post.rating
-                            ? "/images/home/star.svg"
-                            : "/images/home/stara.svg"
-                        }
-                        alt=""
-                        width={12}
-                        height={12}
-                      />
-                    ))}
-                  </div>
-
-                  <Image
-                    src="/images/home/more.svg"
-                    alt=""
-                    width={18}
-                    height={18}
-                    className="ml-auto"
-                  />
-                </div>
-
-                <button
-                  onClick={() => router.push(`/posts/${post.id}`)}
-                  className="mt-[10px] w-full cursor-pointer text-left text-[14px] font-normal leading-[21px] text-black"
-                >
-                  {shortened}
-                  {isLong && (
-                    <span className="font-normal text-[#9A9A9A]">
-                      ... 더보기
-                    </span>
-                  )}
-                </button>
-
-                <div className="relative mt-[10px] h-[12px] w-full">
-                  <Image
-                    src="/images/home/heart.svg"
-                    alt=""
-                    width={12}
-                    height={12}
-                    className="absolute left-0 top-1/2 -translate-y-1/2"
-                  />
-
-                  <p className="absolute left-[17px] top-1/2 -translate-y-1/2 text-[11px] font-normal text-[#9A9A9A]">
-                    {formatCount(post.likeCount)}
-                  </p>
-
-                  <Image
-                    src="/images/home/chat.svg"
-                    alt=""
-                    width={12}
-                    height={12}
-                    className="absolute left-[54px] top-1/2 -translate-y-1/2"
-                  />
-
-                  <p className="absolute left-[71px] top-1/2 -translate-y-1/2 text-[11px] font-normal text-[#9A9A9A]">
-                    {formatCount(post.commentCount)}
-                  </p>
-
-                  <p className="absolute right-0 top-1/2 -translate-y-1/2 text-[11px] font-normal text-[#9A9A9A]">
-                    {post.date}
-                  </p>
-                </div>
-              </article>
+                post={post}
+                book={book}
+                interactive={false}
+              />
             );
           })}
         </div>
