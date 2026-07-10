@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function EmailSignupPage() {
   const router = useRouter();
@@ -27,6 +27,7 @@ export default function EmailSignupPage() {
       return;
     }
 
+    localStorage.setItem("bookmorakSignupEmail", email);
     router.push("/signup/create");
   };
 
@@ -55,28 +56,28 @@ export default function EmailSignupPage() {
         </p>
 
         <div
-          className={`absolute left-[14px] top-[175px] h-[52px] w-[374px] rounded-[8px] border bg-white ${
+          className={`absolute left-[14px] top-[161px] h-[52px] w-[374px] rounded-[8px] border bg-white ${
             isValidEmail ? "border-[#FFBA1A]" : "border-[#E0E0E0]"
           }`}
         >
           <Image
             src={
               isValidEmail
-                  ? "/images/signup/emaila.svg"
-                  : "/images/signup/email.svg"
-               }
-              alt=""
-              width={20}
-              height={20}
-               className="absolute left-[10px] top-1/2 -translate-y-1/2"
-               priority
-            />
+                ? "/images/signup/emaila.svg"
+                : "/images/signup/email.svg"
+            }
+            alt=""
+            width={20}
+            height={20}
+            className="absolute left-[10px] top-1/2 -translate-y-1/2"
+            priority
+          />
 
           <input
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="이메일 주소를 입력해 주세요."
-            className="absolute left-[55px] top-[14px] h-[24px] w-[300px] bg-transparent text-[15px] text-black outline-none placeholder:text-[#9A9A9A]"
+            className="absolute left-[55px] top-1/2 h-[24px] w-[300px] -translate-y-1/2 bg-transparent text-[15px] text-black outline-none placeholder:text-[#9A9A9A]"
           />
         </div>
 

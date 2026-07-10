@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const adjectives = ["똑똑한", "귀여운", "밝은", "수줍은", "상냥한"];
@@ -29,7 +29,11 @@ export default function CreateAccountPage() {
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
 
-  const recommendedNickname = useMemo(() => makeRandomNickname(), []);
+ const [recommendedNickname, setRecommendedNickname] = useState("");
+
+useEffect(() => {
+  setRecommendedNickname(makeRandomNickname());
+}, []);
   const finalNickname = nickname.trim() || recommendedNickname;
 
   const isPasswordMatched =
@@ -45,23 +49,40 @@ export default function CreateAccountPage() {
 
   const handleImageChange = (file?: File) => {
     if (!file) return;
-    setProfileImage(URL.createObjectURL(file));
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      setProfileImage(reader.result as string);
+   };
+
+    reader.readAsDataURL(file);
   };
 
   const handleCreateAccount = () => {
-    if (!canCreateAccount) return;
+  if (!canCreateAccount) return;
 
-    localStorage.setItem(
-      "bookmorakUser",
-      JSON.stringify({
-        nickname: finalNickname,
-        tag,
-        profileImage,
-      })
-    );
+  const signupEmail = localStorage.getItem("bookmorakSignupEmail") ?? "";
 
-    router.push("/home");
-  };
+  const selectedBookIds = JSON.parse(
+    localStorage.getItem("selectedBookIds") ?? "[]"
+  );
+
+  localStorage.setItem("bookmorakEmail", signupEmail);
+  localStorage.setItem("bookmorakPassword", password);
+
+  localStorage.setItem(
+    "bookmorakUser",
+    JSON.stringify({
+      nickname: finalNickname,
+      tag,
+      profileImage,
+      followedBookIds: selectedBookIds,
+    })
+  );
+
+  router.push("/home");
+};
 
   return (
     <main className="flex justify-center bg-white">
@@ -116,7 +137,7 @@ export default function CreateAccountPage() {
         />
 
         <div className="absolute left-[14px] top-[366px] h-[373px] w-[374px]">
-          <p className="text-[14px] font-bold text-black">닉네임</p>
+          <p className="text-[14px] text-black">닉네임</p>
 
           <div className="relative mt-[4px] h-[52px] w-[374px] rounded-[8px] border border-[#E0E0E0] bg-white">
             <input
@@ -134,7 +155,7 @@ export default function CreateAccountPage() {
             <p className="text-[10px] text-[#9A9A9A]">{nickname.length}/10</p>
           </div>
 
-          <p className="mt-[24px] text-[14px] font-bold text-black">태그</p>
+          <p className="mt-[24px] text-[14px] text-black">태그</p>
 
           <div className="relative mt-[4px] h-[52px] w-[374px] rounded-[8px] border border-[#E0E0E0] bg-white">
             <input
@@ -145,7 +166,7 @@ export default function CreateAccountPage() {
             />
           </div>
 
-          <p className="mt-[24px] text-[14px] font-bold text-black">비밀번호</p>
+          <p className="mt-[24px] text-[14px] text-black">비밀번호</p>
 
           <PasswordInput
             value={password}

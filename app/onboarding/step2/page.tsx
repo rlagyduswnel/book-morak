@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Book = {
@@ -10,6 +10,20 @@ type Book = {
   author: string;
   genre: string;
   cover: string;
+};
+
+type Post = {
+  id: string;
+  bookId: string;
+  authorName: string;
+  authorImage?: string;
+  rating: number;
+  content: string;
+  likeCount: number;
+  commentCount: number;
+  date: string;
+  createdAt: string;
+  isMine: boolean;
 };
 
 function parseCSV(csv: string): Book[] {
@@ -37,19 +51,29 @@ function parseCSV(csv: string): Book[] {
   });
 }
 
+function formatCount(count: number) {
+  return count >= 100 ? "99+" : String(count);
+}
+
+function truncateContent(content: string) {
+  if (content.length < 151) return content;
+  return content.slice(0, 151);
+}
+
 export default function Step2Page() {
   const router = useRouter();
 
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBookIds, setSelectedBookIds] = useState<string[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("selectedBookIds");
+    if (saved) setSelectedBookIds(JSON.parse(saved));
 
-    if (saved) {
-      setSelectedBookIds(JSON.parse(saved));
-    }
+    const savedPosts = localStorage.getItem("bookmorakPosts");
+    if (savedPosts) setPosts(JSON.parse(savedPosts));
 
     fetch("/data/books.csv")
       .then((res) => res.text())
@@ -67,10 +91,18 @@ export default function Step2Page() {
   const bookAreaHeight = visibleRowCount * 155;
   const toggleButtonTop = 198 + bookAreaHeight;
 
-  const removeBook = (isbn13: string) => {
-    const next = selectedBookIds.filter((id) => id !== isbn13);
-    setSelectedBookIds(next);
-    localStorage.setItem("selectedBookIds", JSON.stringify(next));
+  const previewPosts = useMemo(() => {
+    return posts
+      .filter((post) => selectedBookIds.includes(post.bookId))
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
+      .slice(0, 2);
+  }, [posts, selectedBookIds]);
+
+  const getBook = (bookId: string) => {
+    return books.find((book) => book.isbn13 === bookId);
   };
 
   return (
@@ -115,10 +147,6 @@ export default function Step2Page() {
           이 책들에 대한 이야기들이 모여요.
         </p>
 
-        <div className="absolute left-[14px] top-[411px] z-0 h-[361px] w-[374px] rounded-[10px] bg-white">
-          {/* 홈 게시글 미리보기 영역 */}
-        </div>
-
         <div
           className={`hide-scrollbar absolute left-[14px] top-[198px] z-20 w-[374px] overflow-x-hidden bg-white ${
             isExpanded ? "overflow-y-auto" : "overflow-y-hidden"
@@ -134,24 +162,11 @@ export default function Step2Page() {
                   className="h-[92px] w-[77px] rounded-[4px] object-cover"
                 />
 
-                <button
-                  onClick={() => removeBook(book.isbn13)}
-                  className="absolute right-[-8px] top-[-8px] cursor-pointer transition-transform active:scale-[0.98]"
-                >
-                  <Image
-                    src="/images/onboarding/X.svg"
-                    alt=""
-                    width={18}
-                    height={18}
-                    priority
-                  />
-                </button>
-
-                <p className="mt-[6px] w-[77px] truncate text-center text-[14px] font-bold text-black">
+                <p className="mt-[6px] w-[77px] truncate text-center text-[14px] font-normal text-black">
                   {book.title}
                 </p>
 
-                <p className="mt-[2px] w-[77px] truncate text-center text-[10px] text-[#9A9A9A]">
+                <p className="mt-[2px] w-[77px] truncate text-center text-[10px] font-normal text-[#9A9A9A]">
                   {book.author}
                 </p>
               </div>
@@ -161,7 +176,7 @@ export default function Step2Page() {
 
         <button
           onClick={() => setIsExpanded((prev) => !prev)}
-          className="absolute left-[14px] z-30 flex h-[44px] w-[374px] cursor-pointer items-center justify-center gap-[10px] rounded-b-[10px] bg-[#E0E0E0] text-[14px] text-black transition-transform active:scale-[0.98]"
+          className="absolute left-[14px] z-30 flex h-[44px] w-[374px] cursor-pointer items-center justify-center gap-[10px] rounded-b-[10px] bg-[#E0E0E0] text-[14px] font-normal text-black transition-transform active:scale-[0.98]"
           style={{ top: `${toggleButtonTop}px` }}
         >
           {isExpanded ? "접기" : "선택한 책 모두 보기"}
@@ -178,9 +193,131 @@ export default function Step2Page() {
           />
         </button>
 
+        <div className="absolute left-[14px] top-[411px] z-0 h-[361px] w-[374px] overflow-hidden bg-white">
+          {previewPosts.map((post) => {
+            const book = getBook(post.bookId);
+            if (!book) return null;
+
+            const shortened = truncateContent(post.content);
+            const isLong = post.content.length >= 151;
+
+            return (
+              <article
+                key={post.id}
+                className="relative w-[374px] border-b border-[#E0E0E0] px-[5px] py-[10px]"
+              >
+                <button
+                  onClick={() => router.push(`/books/${book.isbn13}`)}
+                  className="relative h-[50px] w-full cursor-pointer rounded-[10px] border border-[#FFBA1A] text-left transition-transform active:scale-[0.98]"
+                >
+                  <img
+                    src={book.cover}
+                    alt={book.title}
+                    className="absolute left-[20px] top-1/2 h-[34px] w-[21px] -translate-y-1/2 object-cover"
+                  />
+
+                  <p className="absolute left-[51px] top-[8px] w-[250px] truncate text-[13.5px] font-normal text-black">
+                    {book.title}
+                  </p>
+
+                  <p className="absolute left-[51px] top-[27px] w-[250px] truncate text-[10px] font-normal text-[#9A9A9A]">
+                    {book.author}
+                  </p>
+
+                  <Image
+                    src="/images/home/next.svg"
+                    alt=""
+                    width={6.36}
+                    height={12.71}
+                    className="absolute right-[20px] top-1/2 -translate-y-1/2"
+                  />
+                </button>
+
+                <div className="relative mt-[10px] flex h-[22px] w-full items-center">
+                  <img
+                    src={post.authorImage || "/images/home/normal.svg"}
+                    alt=""
+                    className="h-[22px] w-[22px] rounded-full object-cover"
+                  />
+
+                  <span className="ml-[5px] text-[12px] font-normal text-black">
+                    {post.authorName}
+                  </span>
+
+                  <div className="ml-[5px] flex gap-[2px]">
+                    {Array.from({ length: 5 }).map((_, index) => (
+                      <Image
+                        key={index}
+                        src={
+                          index < post.rating
+                            ? "/images/home/star.svg"
+                            : "/images/home/stara.svg"
+                        }
+                        alt=""
+                        width={12}
+                        height={12}
+                      />
+                    ))}
+                  </div>
+
+                  <Image
+                    src="/images/home/more.svg"
+                    alt=""
+                    width={18}
+                    height={18}
+                    className="ml-auto"
+                  />
+                </div>
+
+                <button
+                  onClick={() => router.push(`/posts/${post.id}`)}
+                  className="mt-[10px] w-full cursor-pointer text-left text-[14px] font-normal leading-[21px] text-black"
+                >
+                  {shortened}
+                  {isLong && (
+                    <span className="font-normal text-[#9A9A9A]">
+                      ... 더보기
+                    </span>
+                  )}
+                </button>
+
+                <div className="relative mt-[10px] h-[12px] w-full">
+                  <Image
+                    src="/images/home/heart.svg"
+                    alt=""
+                    width={12}
+                    height={12}
+                    className="absolute left-0 top-1/2 -translate-y-1/2"
+                  />
+
+                  <p className="absolute left-[17px] top-1/2 -translate-y-1/2 text-[11px] font-normal text-[#9A9A9A]">
+                    {formatCount(post.likeCount)}
+                  </p>
+
+                  <Image
+                    src="/images/home/chat.svg"
+                    alt=""
+                    width={12}
+                    height={12}
+                    className="absolute left-[54px] top-1/2 -translate-y-1/2"
+                  />
+
+                  <p className="absolute left-[71px] top-1/2 -translate-y-1/2 text-[11px] font-normal text-[#9A9A9A]">
+                    {formatCount(post.commentCount)}
+                  </p>
+
+                  <p className="absolute right-0 top-1/2 -translate-y-1/2 text-[11px] font-normal text-[#9A9A9A]">
+                    {post.date}
+                  </p>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+
         <button
           onClick={() => router.push("/onboarding/step3")}
-          className="absolute left-[14px] top-[776px] z-40 flex h-[59px] w-[374px] cursor-pointer items-center justify-center rounded-[8px] bg-[#FFBA1A] text-[16px] text-white transition-transform active:scale-[0.98]"
+          className="absolute left-[14px] top-[776px] z-40 flex h-[59px] w-[374px] cursor-pointer items-center justify-center rounded-[8px] bg-[#FFBA1A] text-[16px] font-normal text-white transition-transform active:scale-[0.98]"
         >
           시작하기
         </button>

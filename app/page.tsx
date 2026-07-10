@@ -47,9 +47,12 @@ export default function Home() {
           시작하기
         </Link>
 
-        <button className="absolute left-[14px] top-[729px] flex h-[59px] w-[374px] cursor-pointer items-center justify-center rounded-[8px] border border-[#FFBA1A] bg-white text-[16px] font-normal text-[#FFBA1A] transition-transform active:scale-[0.98]">
+        <Link
+          href="/login"
+          className="absolute left-[14px] top-[729px] flex h-[59px] w-[374px] items-center justify-center rounded-[8px] border border-[#FFBA1A] bg-white text-[16px] font-normal text-[#FFBA1A] transition-transform active:scale-[0.98]"
+        >
           로그인
-        </button>
+        </Link>
       </section>
     </main>
   );
