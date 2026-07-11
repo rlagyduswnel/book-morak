@@ -15,22 +15,26 @@ export default function MobileFrameScaler({
 
   useEffect(() => {
     const updateScale = () => {
+      const viewportHeight =
+        window.visualViewport?.height ?? window.innerHeight;
+
       const widthScale = window.innerWidth / FRAME_WIDTH;
-      const heightScale = window.innerHeight / FRAME_HEIGHT;
+      const heightScale = viewportHeight / FRAME_HEIGHT;
       // 화면이 프레임보다 작을 때만 줄이고, 데스크탑처럼 큰 화면에서는
-      // 원래 크기(1배) 그대로 두어요.
-      // 양옆(또는 위아래) 여백을 살짝 줄이기 위해 약간만 더 확대해요.
-      const rawScale = Math.min(widthScale, heightScale);
-      setScale(Math.min(1, rawScale * 1.05));
+      // 원래 크기(1배) 그대로 두어요. 잘리는 부분이 없도록 정확히 맞는
+      // 비율만 사용해요 (일부러 더 키우지 않음).
+      setScale(Math.min(1, widthScale, heightScale));
     };
 
     updateScale();
     window.addEventListener("resize", updateScale);
     window.addEventListener("orientationchange", updateScale);
+    window.visualViewport?.addEventListener("resize", updateScale);
 
     return () => {
       window.removeEventListener("resize", updateScale);
       window.removeEventListener("orientationchange", updateScale);
+      window.visualViewport?.removeEventListener("resize", updateScale);
     };
   }, []);
 
