@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { fetchProfileById, updateProfile } from "@/lib/auth";
+import { uploadAvatar } from "@/lib/storage";
 
 const DEFAULT_BIO = "책 이야기가 모락모락 피어나는 곳";
 
@@ -18,6 +19,7 @@ export default function MyEditPage() {
   const [bio, setBio] = useState("");
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isPhotoMenuOpen, setIsPhotoMenuOpen] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
@@ -57,17 +59,20 @@ export default function MyEditPage() {
     setNickname(onlyKorean.slice(0, 10));
   };
 
-  const handleImageChange = (file?: File) => {
-    if (!file) return;
+  const handleImageChange = async (file?: File) => {
+    if (!file || !userId) return;
 
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      setProfileImage(reader.result as string);
-    };
-
-    reader.readAsDataURL(file);
     setIsPhotoMenuOpen(false);
+    setIsUploadingPhoto(true);
+
+    try {
+      const url = await uploadAvatar(userId, file);
+      setProfileImage(url);
+    } catch {
+      // 업로드 실패 시 기존 사진을 그대로 유지해요.
+    } finally {
+      setIsUploadingPhoto(false);
+    }
   };
 
   const canSave = nickname.trim().length > 0 && !isSubmitting;
@@ -139,7 +144,8 @@ export default function MyEditPage() {
 
           <button
             onClick={() => setIsPhotoMenuOpen((prev) => !prev)}
-            className="absolute bottom-0 right-0 flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-full border-2 border-white bg-[#FFBA1A] transition-transform active:scale-[0.98]"
+            disabled={isUploadingPhoto}
+            className="absolute bottom-0 right-0 flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-full border-2 border-white bg-[#FFBA1A] transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <svg
               viewBox="0 0 20 20"

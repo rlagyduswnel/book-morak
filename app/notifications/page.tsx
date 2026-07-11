@@ -66,7 +66,7 @@ export default function NotificationsPage() {
     if (notification.type === "comment") {
       return `${notification.actorName}님이 회원님의 게시물에 댓글을 남겼어요.`;
     }
-    return `${notification.actorName}님이 회원님의 게시물에 대댓글을 남겼어요.`;
+    return `${notification.actorName}님이 회원님의 댓글에 답글을 남겼어요.`;
   };
 
   const handleNotificationClick = async (notification: Notification) => {

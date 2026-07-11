@@ -1,4 +1,5 @@
 import { supabase } from "./supabaseClient";
+import { uploadAvatar } from "./storage";
 
 export type Profile = {
   id: string;
@@ -48,13 +49,13 @@ export async function signUpWithEmail({
   password,
   nickname,
   tag,
-  profileImage,
+  profileImageFile,
 }: {
   email: string;
   password: string;
   nickname: string;
   tag: string;
-  profileImage?: string | null;
+  profileImageFile?: File | null;
 }) {
   const { data, error } = await supabase.auth.signUp({ email, password });
 
@@ -62,11 +63,21 @@ export async function signUpWithEmail({
     throw error ?? new Error("회원가입에 실패했습니다.");
   }
 
+  let profileImageUrl: string | null = null;
+
+  if (profileImageFile) {
+    try {
+      profileImageUrl = await uploadAvatar(data.user.id, profileImageFile);
+    } catch {
+      profileImageUrl = null;
+    }
+  }
+
   const { error: profileError } = await supabase.from("profiles").insert({
     id: data.user.id,
     nickname,
     tag,
-    profile_image: profileImage ?? null,
+    profile_image: profileImageUrl,
   });
 
   if (profileError) throw profileError;

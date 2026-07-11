@@ -147,6 +147,23 @@ export async function createPost({
   if (error) throw error;
 }
 
+export async function updatePost({
+  postId,
+  rating,
+  content,
+}: {
+  postId: string;
+  rating: number;
+  content: string;
+}) {
+  const { error } = await supabase
+    .from("posts")
+    .update({ rating, content })
+    .eq("id", postId);
+
+  if (error) throw error;
+}
+
 export async function deletePost(postId: string) {
   const { error } = await supabase.from("posts").delete().eq("id", postId);
   if (error) throw error;

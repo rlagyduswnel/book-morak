@@ -230,26 +230,15 @@ export default function PostDetailPage() {
 
           <div className="mt-[10px] flex flex-col gap-[15px] px-[14px] pb-[15px]">
             {topLevelComments.map((comment) => (
-              <div key={comment.id} className="flex flex-col gap-[15px]">
-                <CommentItem
-                  comment={comment}
-                  liked={likedCommentIds.includes(comment.id)}
-                  onToggleLike={handleToggleCommentLike}
-                  onDelete={handleDeleteComment}
-                  onReply={setReplyTarget}
-                />
-
-                {(repliesByParentId[comment.id] ?? []).map((reply) => (
-                  <CommentItem
-                    key={reply.id}
-                    comment={reply}
-                    liked={likedCommentIds.includes(reply.id)}
-                    isReply
-                    onToggleLike={handleToggleCommentLike}
-                    onDelete={handleDeleteComment}
-                  />
-                ))}
-              </div>
+              <CommentThread
+                key={comment.id}
+                comment={comment}
+                replies={repliesByParentId[comment.id] ?? []}
+                likedCommentIds={likedCommentIds}
+                onToggleLike={handleToggleCommentLike}
+                onDelete={handleDeleteComment}
+                onReply={setReplyTarget}
+              />
             ))}
           </div>
         </div>
@@ -293,5 +282,87 @@ export default function PostDetailPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+const REPLIES_PAGE_SIZE = 3;
+
+function CommentThread({
+  comment,
+  replies,
+  likedCommentIds,
+  onToggleLike,
+  onDelete,
+  onReply,
+}: {
+  comment: Comment;
+  replies: Comment[];
+  likedCommentIds: string[];
+  onToggleLike: (commentId: string) => void;
+  onDelete: (commentId: string) => void;
+  onReply: (comment: Comment) => void;
+}) {
+  const [visibleCount, setVisibleCount] = useState(REPLIES_PAGE_SIZE);
+
+  const visibleReplies = replies.slice(0, visibleCount);
+  const hasMore = visibleCount < replies.length;
+  const isFullyExpanded =
+    replies.length > REPLIES_PAGE_SIZE && visibleCount >= replies.length;
+
+  return (
+    <div className="flex flex-col gap-[15px]">
+      <CommentItem
+        comment={comment}
+        liked={likedCommentIds.includes(comment.id)}
+        onToggleLike={onToggleLike}
+        onDelete={onDelete}
+        onReply={onReply}
+      />
+
+      {visibleReplies.map((reply) => (
+        <CommentItem
+          key={reply.id}
+          comment={reply}
+          liked={likedCommentIds.includes(reply.id)}
+          isReply
+          onToggleLike={onToggleLike}
+          onDelete={onDelete}
+        />
+      ))}
+
+      {hasMore && (
+        <button
+          onClick={() => setVisibleCount((prev) => prev + REPLIES_PAGE_SIZE)}
+          className="ml-[24px] flex cursor-pointer items-center gap-[4px] text-[12px] font-normal text-[#9A9A9A]"
+        >
+          <ReplyArrowIcon />
+          답글 펼치기 &gt;
+        </button>
+      )}
+
+      {isFullyExpanded && (
+        <button
+          onClick={() => setVisibleCount(REPLIES_PAGE_SIZE)}
+          className="ml-[24px] flex cursor-pointer items-center gap-[4px] text-[12px] font-normal text-[#9A9A9A]"
+        >
+          <ReplyArrowIcon />
+          답글 접기 &lt;
+        </button>
+      )}
+    </div>
+  );
+}
+
+function ReplyArrowIcon() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" className="h-[14px] w-[14px] shrink-0 text-[#9A9A9A]">
+      <path
+        d="M4 2v6a2 2 0 0 0 2 2h6M9 7l3 3-3 3"
+        stroke="currentColor"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

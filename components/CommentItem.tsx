@@ -41,7 +41,7 @@ export default function CommentItem({
         </svg>
       )}
 
-      <div className="flex-1">
+      <div className="min-w-0 flex-1">
         <div className="relative flex items-center">
           <img
             src={comment.authorImage || "/images/home/normal.svg"}
@@ -88,7 +88,7 @@ export default function CommentItem({
           )}
         </div>
 
-        <p className="mt-[6px] text-[14px] font-normal leading-[19px] text-black">
+        <p className="mt-[6px] break-words text-[14px] font-normal leading-[19px] text-black">
           {comment.content}
         </p>
 

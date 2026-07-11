@@ -26,6 +26,7 @@ export default function CreateAccountPage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [nickname, setNickname] = useState("");
   const [tag] = useState(makeRandomTag);
   const [password, setPassword] = useState("");
@@ -55,6 +56,8 @@ useEffect(() => {
   const handleImageChange = (file?: File) => {
     if (!file) return;
 
+    setProfileImageFile(file);
+
     const reader = new FileReader();
 
     reader.onload = () => {
@@ -82,7 +85,7 @@ useEffect(() => {
       password,
       nickname: finalNickname,
       tag,
-      profileImage,
+      profileImageFile,
     });
 
     await followBooks(user.id, selectedBookIds);
@@ -141,7 +144,10 @@ useEffect(() => {
 
           {profileImage && (
             <button
-              onClick={() => setProfileImage(null)}
+              onClick={() => {
+                setProfileImage(null);
+                setProfileImageFile(null);
+              }}
               className="absolute right-[-4px] top-[-4px] z-10 cursor-pointer transition-transform active:scale-[0.98]"
             >
               <Image src="/images/onboarding/X.svg" alt="" width={22} height={22} priority />
