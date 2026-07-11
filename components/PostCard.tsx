@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { likePost, unlikePost } from "@/lib/likes";
 import { deletePost } from "@/lib/posts";
@@ -55,6 +55,12 @@ function formatCount(count: number) {
   return count >= 100 ? "99+" : String(count);
 }
 
+function truncateContent(content: string) {
+  if (content.length <= 100) return content;
+
+  return content.slice(0, 100);
+}
+
 export default function PostCard({
   post,
   book,
@@ -70,17 +76,6 @@ export default function PostCard({
   const [liked, setLiked] = useState(initiallyLiked);
   const [likeCount, setLikeCount] = useState(post.likeCount);
   const [menuOpened, setMenuOpened] = useState(false);
-  const [isTruncated, setIsTruncated] = useState(false);
-  const contentRef = useRef<HTMLParagraphElement>(null);
-
-  useEffect(() => {
-    if (fullContent) return;
-
-    const el = contentRef.current;
-    if (!el) return;
-
-    setIsTruncated(el.scrollHeight > el.clientHeight + 1);
-  }, [post.content, fullContent]);
 
   const handleToggleLike = async () => {
     if (!currentUserId) return;
@@ -103,6 +98,9 @@ export default function PostCard({
       setLikeCount(likeCount);
     }
   };
+
+  const shortenedContent = truncateContent(post.content);
+  const isLongContent = post.content.length > 100;
 
   const handleDelete = async () => {
     setMenuOpened(false);
@@ -252,25 +250,16 @@ export default function PostCard({
               : undefined
           }
           tabIndex={interactive ? 0 : -1}
-          className={`w-full text-left ${
+          className={`w-full whitespace-pre-line text-left text-[16px] font-normal leading-[21px] text-black ${
             interactive ? "cursor-pointer" : "cursor-default"
           }`}
         >
-          <p
-            ref={contentRef}
-            className={`whitespace-pre-line text-[16px] font-normal leading-[21px] text-black ${
-              fullContent ? "" : "line-clamp-4 overflow-hidden"
-            }`}
-          >
-            {post.content}
-          </p>
-        </button>
+          {fullContent ? post.content : shortenedContent}
 
-        {!fullContent && isTruncated && (
-          <span className="pointer-events-none absolute bottom-0 right-0 bg-white pl-[6px] text-[16px] font-normal leading-[21px] text-[#9A9A9A]">
-            ... 더보기
-          </span>
-        )}
+          {!fullContent && isLongContent && (
+            <span className="font-normal text-[#9A9A9A]"> ... 더보기</span>
+          )}
+        </button>
       </div>
 
       {/* 게시글 정보 */}
