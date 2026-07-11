@@ -88,7 +88,7 @@ export default function CommentItem({
           )}
         </div>
 
-        <p className="mt-[6px] break-words text-[14px] font-normal leading-[19px] text-black">
+        <p className="mt-[6px] whitespace-pre-line break-words text-[14px] font-normal leading-[19px] text-black">
           {comment.content}
         </p>
 

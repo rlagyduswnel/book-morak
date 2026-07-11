@@ -249,7 +249,7 @@ export default function PostCard({
             : undefined
         }
         tabIndex={interactive ? 0 : -1}
-        className={`mt-[10px] w-full text-left text-[16px] font-normal leading-[21px] text-black ${
+        className={`mt-[10px] w-full whitespace-pre-line text-left text-[16px] font-normal leading-[21px] text-black ${
           interactive ? "cursor-pointer" : "cursor-default"
         }`}
       >
