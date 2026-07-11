@@ -38,8 +38,9 @@ export default function ExplorePage() {
 
     const load = async () => {
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        data: { session },
+      } = await supabase.auth.getSession();
+      const user = session?.user ?? null;
 
       if (!user) {
         router.replace("/login");
@@ -118,12 +119,12 @@ export default function ExplorePage() {
     <main className="flex justify-center bg-white">
       <section className="relative h-[874px] w-full max-w-[402px] overflow-hidden bg-white">
         <header className="absolute left-0 top-0 h-[100px] w-[402px] px-[14px]">
-          <h1 className="absolute bottom-0 left-0 w-full text-center text-[18px] font-bold text-black">
+          <h1 className="absolute bottom-0 left-0 w-full text-center text-[20px] font-bold text-black">
             책 검색
           </h1>
         </header>
 
-        <div className="absolute left-[14px] top-[115px] h-[40px] w-[374px] rounded-[10px] border border-[#FFBA1A] bg-white">
+        <div className="absolute left-[14px] top-[115px] h-[52px] w-[374px] rounded-[10px] border border-[#FFBA1A] bg-white">
           <Image
             src="/images/onboarding/Q.svg"
             alt=""
@@ -137,7 +138,7 @@ export default function ExplorePage() {
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             placeholder="검색어를 입력해 주세요."
-            className="absolute left-[41px] top-1/2 h-[24px] w-[310px] -translate-y-1/2 bg-transparent text-[14px] font-normal text-black outline-none placeholder:text-[#9A9A9A]"
+            className="absolute left-[41px] top-1/2 h-[24px] w-[310px] -translate-y-1/2 bg-transparent text-[17px] font-normal text-black outline-none placeholder:text-[#9A9A9A]"
           />
         </div>
 
@@ -149,7 +150,7 @@ export default function ExplorePage() {
               key={genre.id}
               onClick={() => setSelectedGenre(genre.id)}
               style={{ left: genre.x, width: genre.w }}
-              className={`absolute top-[170px] h-[25px] cursor-pointer rounded-[41px] text-[14px] transition-transform active:scale-[0.98] ${
+              className={`absolute top-[182px] h-[25px] cursor-pointer rounded-[41px] text-[16px] transition-transform active:scale-[0.98] ${
                 selected
                   ? "bg-[#FFBA1A] text-white"
                   : "border border-[#E0E0E0] bg-white text-[#9A9A9A]"
@@ -160,7 +161,7 @@ export default function ExplorePage() {
           );
         })}
 
-        <section className="hide-scrollbar absolute left-[14px] top-[210px] h-[584px] w-[374px] overflow-y-auto overflow-x-hidden">
+        <section className="hide-scrollbar absolute left-[14px] top-[222px] h-[572px] w-[374px] overflow-y-auto overflow-x-hidden">
           <div className="flex w-[374px] flex-col gap-[15px]">
             {filteredBooks.map((book) => {
               const isFollowing = followedBookIds.includes(book.isbn13);
@@ -178,11 +179,11 @@ export default function ExplorePage() {
                   />
 
                   <div className="absolute left-[101px] top-1/2 flex w-[190px] -translate-y-1/2 flex-col gap-[8px]">
-                    <p className="w-[190px] truncate text-[14px] font-normal text-black">
+                    <p className="w-[190px] truncate text-[16px] font-normal text-black">
                       {book.title}
                     </p>
 
-                    <p className="w-[190px] truncate text-[10px] font-normal text-[#9A9A9A]">
+                    <p className="w-[190px] truncate text-[12px] font-normal text-[#9A9A9A]">
                       {book.author}
                     </p>
 
@@ -190,15 +191,15 @@ export default function ExplorePage() {
                       <Image
                         src="/images/home/starb.svg"
                         alt=""
-                        width={10}
-                        height={10}
+                        width={12}
+                        height={12}
                       />
-                      <span className="text-[10px] font-normal text-black">
+                      <span className="text-[12px] font-normal text-black">
                         {getAverageRating(book.isbn13)}
                       </span>
                     </div>
 
-                    <p className="w-fit rounded-[5px] border border-[#E0E0E0] px-[6px] py-[2px] text-[10px] font-normal text-[#9A9A9A]">
+                    <p className="w-fit rounded-[5px] border border-[#E0E0E0] px-[6px] py-[2px] text-[12px] font-normal text-[#9A9A9A]">
                       {book.genre}
                     </p>
                   </div>
@@ -282,7 +283,7 @@ function NavItem({
       <Image src={active ? activeIcon : icon} alt="" width={24} height={24} />
 
       <span
-        className={`whitespace-nowrap text-[8px] font-normal ${
+        className={`whitespace-nowrap text-[10px] font-normal ${
           active ? "text-[#FFBA1A]" : "text-[#9A9A9A]"
         }`}
       >

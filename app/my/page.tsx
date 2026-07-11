@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import PostCard, { Book, Post } from "@/components/PostCard";
 import { parseCSV } from "@/lib/parseCSV";
 import { supabase } from "@/lib/supabaseClient";
-import { getCurrentProfile, type Profile } from "@/lib/auth";
+import { fetchProfileById, type Profile } from "@/lib/auth";
 import { fetchFollowedBookIds } from "@/lib/follows";
 import { fetchMyPosts } from "@/lib/posts";
 import { fetchLikedPostIds } from "@/lib/likes";
@@ -25,8 +25,9 @@ export default function MyPage() {
 
     const load = async () => {
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        data: { session },
+      } = await supabase.auth.getSession();
+      const user = session?.user ?? null;
 
       if (!user) {
         router.replace("/login");
@@ -35,7 +36,7 @@ export default function MyPage() {
 
       const [currentProfile, followedBookIds, likedIds, csv, fetchedMyPosts] =
         await Promise.all([
-          getCurrentProfile(),
+          fetchProfileById(user.id),
           fetchFollowedBookIds(user.id),
           fetchLikedPostIds(user.id),
           fetch("/data/books.csv").then((res) => res.text()),
@@ -76,7 +77,7 @@ export default function MyPage() {
       <section className="relative h-[874px] w-full max-w-[402px] overflow-hidden bg-white">
         {/* 상단 영역 */}
         <header className="absolute left-0 top-0 h-[100px] w-[402px] px-[14px]">
-          <h1 className="absolute bottom-0 left-0 w-full text-center text-[18px] font-bold text-black">
+          <h1 className="absolute bottom-0 left-0 w-full text-center text-[20px] font-bold text-black">
             마이페이지
           </h1>
 
@@ -89,7 +90,7 @@ export default function MyPage() {
         </header>
 
         {/* 마이 정보 영역 */}
-        <section className="absolute left-0 top-[115px] h-[146px] w-[402px] border-b border-[#E0E0E0] px-[8px] py-[15px]">
+        <section className="absolute left-0 top-[115px] h-[165px] w-[402px] border-b border-[#E0E0E0] px-[8px] py-[15px]">
           <img
             src={profile?.profileImage || "/images/home/normal.svg"}
             alt=""
@@ -98,28 +99,28 @@ export default function MyPage() {
 
           <button
             onClick={() => router.push("/my/edit")}
-            className="absolute left-[16px] top-[100px] flex h-[22px] w-[61px] cursor-pointer items-center justify-center rounded-[8px] border border-[#E0E0E0] text-[8px] font-normal text-[#9A9A9A] transition-transform active:scale-[0.98]"
+            className="absolute left-[8px] top-[99px] flex h-[36px] w-[78px] cursor-pointer items-center justify-center rounded-[8px] border border-[#E0E0E0] text-[12px] font-normal text-[#9A9A9A] transition-transform active:scale-[0.98]"
           >
             프로필 편집
           </button>
 
-          <p className="absolute left-[109px] top-0 text-[14px] font-normal text-black">
+          <p className="absolute left-[109px] top-0 text-[16px] font-normal text-black">
             {nickname}
             {tag ? `#${tag}` : ""}
           </p>
 
           <div className="absolute left-[109px] top-[33px] flex h-[39px] w-[239px] items-center rounded-tr-[8px] rounded-br-[8px] rounded-bl-[8px] border border-[#E0E0E0] px-[10px]">
-            <p className="text-left text-[12px] font-normal text-black">
+            <p className="text-left text-[13px] font-normal text-black">
               {bio}
             </p>
           </div>
 
-          <div className="absolute left-[228.5px] top-[89px] flex -translate-x-1/2 items-end gap-[80px]">
+          <div className="absolute left-[228.5px] top-[102px] flex -translate-x-1/2 items-end gap-[80px]">
             <div className="flex flex-col items-center">
-              <span className="text-[14px] font-normal leading-none text-[#FFBA1A]">
+              <span className="text-[16px] font-normal leading-none text-[#FFBA1A]">
                 {postCount}
               </span>
-              <span className="mt-[5px] text-[11px] font-normal leading-none text-[#9A9A9A]">
+              <span className="mt-[5px] text-[12px] font-normal leading-none text-[#9A9A9A]">
                 게시글
               </span>
             </div>
@@ -128,10 +129,10 @@ export default function MyPage() {
               onClick={() => router.push("/my/following")}
               className="flex cursor-pointer flex-col items-center transition-transform active:scale-[0.98]"
             >
-              <span className="text-[14px] font-normal leading-none text-[#FFBA1A]">
+              <span className="text-[16px] font-normal leading-none text-[#FFBA1A]">
                 {followingCount}
               </span>
-              <span className="mt-[5px] text-[11px] font-normal leading-none text-[#9A9A9A]">
+              <span className="mt-[5px] text-[12px] font-normal leading-none text-[#9A9A9A]">
                 팔로잉
               </span>
             </button>
@@ -139,7 +140,7 @@ export default function MyPage() {
         </section>
 
         {/* 게시글 영역 */}
-        <section className="hide-scrollbar absolute left-[14px] top-[276px] h-[518px] w-[374px] overflow-y-auto overflow-x-hidden">
+        <section className="hide-scrollbar absolute left-[14px] top-[295px] h-[499px] w-[374px] overflow-y-auto overflow-x-hidden">
           <div className="flex flex-col gap-[15px]">
             {myPosts.map((post) => {
               const book = getBook(post.bookId);
@@ -220,7 +221,7 @@ function NavItem({
       <Image src={active ? activeIcon : icon} alt="" width={24} height={24} />
 
       <span
-        className={`whitespace-nowrap text-[8px] font-normal ${
+        className={`whitespace-nowrap text-[10px] font-normal ${
           active ? "text-[#FFBA1A]" : "text-[#9A9A9A]"
         }`}
       >

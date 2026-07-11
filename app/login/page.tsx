@@ -46,12 +46,12 @@ export default function LoginPage() {
           />
         </button>
 
-        <h1 className="absolute left-0 top-[79px] w-full text-center text-[18px] font-bold leading-[24px] tracking-[-0.025em] text-black">
+        <h1 className="absolute left-0 top-[79px] w-full text-center text-[20px] font-bold leading-[24px] tracking-[-0.025em] text-black">
           이메일로 로그인
         </h1>
 
         <div className="absolute left-[14px] top-[136px] h-[209px] w-[374px]">
-          <p className="text-[14px] text-black">이메일</p>
+          <p className="text-[16px] text-black">이메일</p>
 
           <div className="relative mt-[4px] h-[52px] w-[374px] rounded-[8px] border border-[#E0E0E0] bg-white">
             <Image
@@ -67,11 +67,11 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="이메일 주소를 입력해 주세요."
-              className="absolute left-[55px] top-1/2 h-[24px] w-[300px] -translate-y-1/2 bg-transparent text-[15px] text-black outline-none placeholder:text-[#9A9A9A]"
+              className="absolute left-[55px] top-1/2 h-[24px] w-[300px] -translate-y-1/2 bg-transparent text-[17px] text-black outline-none placeholder:text-[#9A9A9A]"
             />
           </div>
 
-          <p className="mt-[36px] text-[14px] text-black">비밀번호</p>
+          <p className="mt-[36px] text-[16px] text-black">비밀번호</p>
 
           <div className="relative mt-[4px] h-[52px] w-[374px] rounded-[8px] border border-[#E0E0E0] bg-white">
             <input
@@ -79,17 +79,17 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               type="password"
               placeholder="비밀번호를 입력해 주세요."
-              className="absolute left-[14px] top-1/2 h-[24px] w-[330px] -translate-y-1/2 bg-transparent text-[15px] text-black outline-none placeholder:text-[#9A9A9A]"
+              className="absolute left-[14px] top-1/2 h-[24px] w-[330px] -translate-y-1/2 bg-transparent text-[17px] text-black outline-none placeholder:text-[#9A9A9A]"
             />
           </div>
 
-          <p className="mt-[4px] text-[12px] text-[#9A9A9A]">
+          <p className="mt-[4px] text-[13px] text-[#9A9A9A]">
             이메일 또는 비밀번호를 확인해주세요.
           </p>
         </div>
 
         {showToast && (
-          <div className="absolute left-[24px] top-[724px] z-30 flex h-[48px] w-[355px] items-center justify-center rounded-[24px] bg-black/75 text-[12px] text-white">
+          <div className="absolute left-[24px] top-[724px] z-30 flex h-[48px] w-[355px] items-center justify-center rounded-[24px] bg-black/75 text-[13px] text-white">
             이메일과 비밀번호를 확인해주세요.
           </div>
         )}
@@ -97,7 +97,7 @@ export default function LoginPage() {
         <button
           disabled={!canLogin}
           onClick={handleLogin}
-          className={`absolute left-[14px] top-[795px] flex h-[52px] w-[374px] items-center justify-center rounded-[8px] text-[16px] font-bold text-white transition-transform ${
+          className={`absolute left-[14px] top-[788px] flex h-[59px] w-[374px] items-center justify-center rounded-[8px] text-[18px] font-bold text-white transition-transform ${
             canLogin
               ? "cursor-pointer bg-[#FFBA1A] active:scale-[0.98]"
               : "cursor-not-allowed bg-[#9A9A9A]"

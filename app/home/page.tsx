@@ -23,8 +23,9 @@ export default function HomePage() {
 
     const load = async () => {
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        data: { session },
+      } = await supabase.auth.getSession();
+      const user = session?.user ?? null;
 
       if (!user) {
         router.replace("/login");
@@ -183,7 +184,7 @@ function NavItem({
       />
 
       <span
-        className={`whitespace-nowrap text-[8px] font-normal ${
+        className={`whitespace-nowrap text-[10px] font-normal ${
           active
             ? "text-[#FFBA1A]"
             : "text-[#9A9A9A]"

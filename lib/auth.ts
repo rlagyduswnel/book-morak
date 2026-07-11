@@ -16,14 +16,13 @@ export async function getCurrentUser() {
   return user;
 }
 
-export async function getCurrentProfile(): Promise<Profile | null> {
-  const user = await getCurrentUser();
-  if (!user) return null;
-
+export async function fetchProfileById(
+  userId: string
+): Promise<Profile | null> {
   const { data, error } = await supabase
     .from("profiles")
     .select("id, nickname, tag, bio, profile_image")
-    .eq("id", user.id)
+    .eq("id", userId)
     .single();
 
   if (error || !data) return null;
@@ -35,6 +34,13 @@ export async function getCurrentProfile(): Promise<Profile | null> {
     bio: data.bio,
     profileImage: data.profile_image,
   };
+}
+
+export async function getCurrentProfile(): Promise<Profile | null> {
+  const user = await getCurrentUser();
+  if (!user) return null;
+
+  return fetchProfileById(user.id);
 }
 
 export async function signUpWithEmail({
@@ -77,6 +83,50 @@ export async function signInWithEmail(email: string, password: string) {
   if (error) throw error;
 
   return data.user;
+}
+
+export async function updateProfile({
+  userId,
+  nickname,
+  bio,
+  profileImage,
+}: {
+  userId: string;
+  nickname: string;
+  bio: string;
+  profileImage: string | null;
+}) {
+  const { error } = await supabase
+    .from("profiles")
+    .update({ nickname, bio, profile_image: profileImage })
+    .eq("id", userId);
+
+  if (error) throw error;
+}
+
+export async function updatePassword({
+  email,
+  currentPassword,
+  newPassword,
+}: {
+  email: string;
+  currentPassword: string;
+  newPassword: string;
+}) {
+  const { error: verifyError } = await supabase.auth.signInWithPassword({
+    email,
+    password: currentPassword,
+  });
+
+  if (verifyError) {
+    throw new Error("현재 비밀번호가 일치하지 않습니다.");
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+
+  if (error) throw error;
 }
 
 export async function signOut() {

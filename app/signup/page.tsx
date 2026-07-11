@@ -73,11 +73,11 @@ export default function EmailSignupPage() {
           />
         </button>
 
-        <h1 className="absolute left-0 top-[79px] w-full text-center text-[18px] font-bold leading-[24px] tracking-[-0.025em] text-black">
+        <h1 className="absolute left-0 top-[79px] w-full text-center text-[20px] font-bold leading-[24px] tracking-[-0.025em] text-black">
           이메일 인증하기
         </h1>
 
-        <p className="absolute left-[14px] top-[136px] text-[14px] text-black">
+        <p className="absolute left-[14px] top-[136px] text-[16px] text-black">
           이메일
         </p>
 
@@ -103,18 +103,18 @@ export default function EmailSignupPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="이메일 주소를 입력해 주세요."
-            className="absolute left-[55px] top-1/2 h-[24px] w-[300px] -translate-y-1/2 bg-transparent text-[15px] text-black outline-none placeholder:text-[#9A9A9A]"
+            className="absolute left-[55px] top-1/2 h-[24px] w-[300px] -translate-y-1/2 bg-transparent text-[17px] text-black outline-none placeholder:text-[#9A9A9A]"
           />
         </div>
 
         {showToast && (
-          <div className="absolute left-[24px] top-[724px] z-30 flex h-[48px] w-[355px] items-center justify-center rounded-[24px] bg-black/75 text-[12px] text-white">
+          <div className="absolute left-[24px] top-[724px] z-30 flex h-[48px] w-[355px] items-center justify-center rounded-[24px] bg-black/75 text-[13px] text-white">
             인증 메일이 전송되었습니다.
           </div>
         )}
 
         {showDuplicateToast && (
-          <div className="absolute left-[24px] top-[724px] z-30 flex h-[48px] w-[355px] items-center justify-center rounded-[24px] bg-black/75 text-[12px] text-white">
+          <div className="absolute left-[24px] top-[724px] z-30 flex h-[48px] w-[355px] items-center justify-center rounded-[24px] bg-black/75 text-[13px] text-white">
             이미 가입된 이메일이에요. 다른 이메일을 입력해 주세요.
           </div>
         )}
@@ -122,7 +122,7 @@ export default function EmailSignupPage() {
         <button
           disabled={!isValidEmail || isChecking}
           onClick={handleSubmit}
-          className={`absolute left-[14px] top-[795px] flex h-[52px] w-[374px] items-center justify-center rounded-[8px] text-[16px] font-bold text-white transition-transform ${
+          className={`absolute left-[14px] top-[788px] flex h-[59px] w-[374px] items-center justify-center rounded-[8px] text-[18px] font-bold text-white transition-transform ${
             isValidEmail && !isChecking
               ? "cursor-pointer bg-[#FFBA1A] active:scale-[0.98]"
               : "cursor-not-allowed bg-[#9A9A9A]"

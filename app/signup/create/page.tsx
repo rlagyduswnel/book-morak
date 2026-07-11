@@ -34,6 +34,7 @@ export default function CreateAccountPage() {
  const [recommendedNickname, setRecommendedNickname] = useState("");
  const [isSubmitting, setIsSubmitting] = useState(false);
  const [errorMessage, setErrorMessage] = useState("");
+ const [showDuplicateEmailToast, setShowDuplicateEmailToast] = useState(false);
 
 useEffect(() => {
   setRecommendedNickname(makeRandomNickname());
@@ -88,11 +89,17 @@ useEffect(() => {
 
     router.push("/home");
   } catch (error) {
-    setErrorMessage(
-      error instanceof Error
-        ? error.message
-        : "계정 생성에 실패했습니다. 다시 시도해 주세요."
-    );
+    const message = error instanceof Error ? error.message : "";
+
+    if (message.toLowerCase().includes("already registered")) {
+      setShowDuplicateEmailToast(true);
+
+      setTimeout(() => {
+        setShowDuplicateEmailToast(false);
+      }, 1800);
+    } else {
+      setErrorMessage(message || "계정 생성에 실패했습니다. 다시 시도해 주세요.");
+    }
   } finally {
     setIsSubmitting(false);
   }
@@ -108,22 +115,22 @@ useEffect(() => {
           <Image src="/images/onboarding/back.svg" alt="" width={11} height={20} priority />
         </button>
 
-        <h1 className="absolute left-0 top-[79px] w-full text-center text-[18px] font-bold leading-[24px] tracking-[-0.025em] text-black">
+        <h1 className="absolute left-0 top-[79px] w-full text-center text-[20px] font-bold leading-[24px] tracking-[-0.025em] text-black">
           계정 생성
         </h1>
 
-        <p className="absolute left-[82px] top-[123px] text-[14px] text-[#9A9A9A]">
+        <p className="absolute left-[82px] top-[123px] text-[16px] text-[#9A9A9A]">
           책모락에서 이용할 계정을 만들어 주세요.
         </p>
 
-        <p className="absolute left-[30px] top-[172px] text-[14px] font-bold text-black">
+        <p className="absolute left-[30px] top-[172px] text-[16px] font-bold text-black">
           프로필 사진 등록
         </p>
 
         <div className="absolute left-[131px] top-[205px] h-[142px] w-[142px]">
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex h-[142px] w-[142px] cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[#FEF6E4] text-[15px] text-[#FFBA1A] transition-transform active:scale-[0.98]"
+            className="flex h-[142px] w-[142px] cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[#FEF6E4] text-[17px] text-[#FFBA1A] transition-transform active:scale-[0.98]"
           >
             {profileImage ? (
               <img src={profileImage} alt="프로필 이미지" className="h-full w-full object-cover" />
@@ -151,36 +158,36 @@ useEffect(() => {
         />
 
         <div className="absolute left-[14px] top-[366px] h-[373px] w-[374px]">
-          <p className="text-[14px] text-black">닉네임</p>
+          <p className="text-[16px] text-black">닉네임</p>
 
           <div className="relative mt-[4px] h-[52px] w-[374px] rounded-[8px] border border-[#E0E0E0] bg-white">
             <input
               value={nickname}
               onChange={(e) => handleNicknameChange(e.target.value)}
               placeholder={recommendedNickname}
-              className="absolute left-[14px] top-1/2 h-[24px] w-[300px] -translate-y-1/2 bg-transparent text-[15px] text-black outline-none placeholder:text-[#9A9A9A]"
+              className="absolute left-[14px] top-1/2 h-[24px] w-[300px] -translate-y-1/2 bg-transparent text-[17px] text-black outline-none placeholder:text-[#9A9A9A]"
             />
           </div>
 
           <div className="mt-[4px] flex w-full items-center justify-between">
-            <p className="text-[12px] text-[#9A9A9A]">
+            <p className="text-[13px] text-[#9A9A9A]">
               닉네임은 10자 이내로 한글로만 가능합니다.
             </p>
-            <p className="text-[10px] text-[#9A9A9A]">{nickname.length}/10</p>
+            <p className="text-[12px] text-[#9A9A9A]">{nickname.length}/10</p>
           </div>
 
-          <p className="mt-[24px] text-[14px] text-black">태그</p>
+          <p className="mt-[24px] text-[16px] text-black">태그</p>
 
           <div className="relative mt-[4px] h-[52px] w-[374px] rounded-[8px] border border-[#E0E0E0] bg-white">
             <input
               value={`# ${tag}`}
               readOnly
               tabIndex={-1}
-              className="absolute left-[14px] top-1/2 h-[24px] w-[300px] -translate-y-1/2 bg-transparent text-[15px] text-[#9A9A9A] outline-none"
+              className="absolute left-[14px] top-1/2 h-[24px] w-[300px] -translate-y-1/2 bg-transparent text-[17px] text-[#9A9A9A] outline-none"
             />
           </div>
 
-          <p className="mt-[24px] text-[14px] text-black">비밀번호</p>
+          <p className="mt-[24px] text-[16px] text-black">비밀번호</p>
 
           <PasswordInput
             value={password}
@@ -198,13 +205,19 @@ useEffect(() => {
             />
           </div>
 
-          <p className="mt-[4px] text-[12px] text-[#9A9A9A]">
+          <p className="mt-[4px] text-[13px] text-[#9A9A9A]">
             비밀번호는 영어, 숫자, 특수문화를 포함하여, 8~16자 이내로 가능합니다.
           </p>
         </div>
 
+        {showDuplicateEmailToast && (
+          <div className="absolute left-[24px] top-[724px] z-30 flex h-[48px] w-[355px] items-center justify-center rounded-[24px] bg-black/75 text-[13px] text-white">
+            이미 가입된 이메일이에요. 다른 이메일을 입력해 주세요.
+          </div>
+        )}
+
         {errorMessage && (
-          <p className="absolute left-[14px] top-[770px] w-[374px] text-center text-[12px] font-normal text-red-500">
+          <p className="absolute left-[14px] top-[770px] w-[374px] text-center text-[13px] font-normal text-red-500">
             {errorMessage}
           </p>
         )}
@@ -212,7 +225,7 @@ useEffect(() => {
         <button
           disabled={!canCreateAccount}
           onClick={handleCreateAccount}
-          className={`absolute left-[14px] top-[795px] flex h-[52px] w-[374px] items-center justify-center rounded-[8px] text-[16px] font-bold text-white transition-transform ${
+          className={`absolute left-[14px] top-[788px] flex h-[59px] w-[374px] items-center justify-center rounded-[8px] text-[18px] font-bold text-white transition-transform ${
             canCreateAccount
               ? "cursor-pointer bg-[#FFBA1A] active:scale-[0.98]"
               : "cursor-not-allowed bg-[#9A9A9A]"
@@ -247,7 +260,7 @@ function PasswordInput({
         onChange={(e) => onChange(e.target.value.slice(0, 16))}
         type="password"
         placeholder={placeholder}
-        className="absolute left-[14px] top-1/2 h-[24px] w-[330px] -translate-y-1/2 bg-transparent text-[15px] text-black outline-none placeholder:text-[#9A9A9A]"
+        className="absolute left-[14px] top-1/2 h-[24px] w-[330px] -translate-y-1/2 bg-transparent text-[17px] text-black outline-none placeholder:text-[#9A9A9A]"
       />
     </div>
   );

@@ -42,14 +42,14 @@ export default function Home() {
 
         <Link
           href="/onboarding/books"
-          className="absolute left-[14px] top-[658px] flex h-[59px] w-[374px] cursor-pointer items-center justify-center rounded-[8px] bg-[#FFBA1A] text-[16px] font-normal text-white transition-transform active:scale-[0.98]"
+          className="absolute left-[14px] top-[658px] flex h-[59px] w-[374px] cursor-pointer items-center justify-center rounded-[8px] bg-[#FFBA1A] text-[18px] font-normal text-white transition-transform active:scale-[0.98]"
         >
           시작하기
         </Link>
 
         <Link
           href="/login"
-          className="absolute left-[14px] top-[729px] flex h-[59px] w-[374px] items-center justify-center rounded-[8px] border border-[#FFBA1A] bg-white text-[16px] font-normal text-[#FFBA1A] transition-transform active:scale-[0.98]"
+          className="absolute left-[14px] top-[729px] flex h-[59px] w-[374px] items-center justify-center rounded-[8px] border border-[#FFBA1A] bg-white text-[18px] font-normal text-[#FFBA1A] transition-transform active:scale-[0.98]"
         >
           로그인
         </Link>

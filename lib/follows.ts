@@ -1,5 +1,16 @@
 import { supabase } from "./supabaseClient";
 
+export async function fetchFollowerCount(bookId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("follows")
+    .select("*", { count: "exact", head: true })
+    .eq("book_id", bookId);
+
+  if (error || count === null) return 0;
+
+  return count;
+}
+
 export async function fetchFollowedBookIds(userId: string): Promise<string[]> {
   const { data, error } = await supabase
     .from("follows")

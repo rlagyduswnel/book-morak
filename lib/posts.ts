@@ -17,7 +17,7 @@ type PostRow = {
 };
 
 const POST_SELECT_COLUMNS =
-  "id, user_id, book_id, rating, content, like_count, comment_count, created_at, profiles(nickname, profile_image)";
+  "id, user_id, book_id, rating, content, like_count, comment_count, created_at, profiles!posts_user_id_fkey(nickname, profile_image)";
 
 function formatDate(iso: string) {
   const date = new Date(iso);
@@ -55,7 +55,11 @@ export async function fetchPostsByBookIds(
     .in("book_id", bookIds)
     .order("created_at", { ascending: false });
 
-  if (error || !data) return [];
+  if (error) {
+    console.error("fetchPostsByBookIds error:", error.message, error.details, error.hint, error.code);
+    return [];
+  }
+  if (!data) return [];
 
   return (data as unknown as PostRow[]).map((row) =>
     mapPost(row, currentUserId)
@@ -69,7 +73,11 @@ export async function fetchMyPosts(userId: string): Promise<Post[]> {
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
-  if (error || !data) return [];
+  if (error) {
+    console.error("fetchMyPosts error:", error.message, error.details, error.hint, error.code);
+    return [];
+  }
+  if (!data) return [];
 
   return (data as unknown as PostRow[]).map((row) => mapPost(row, userId));
 }
@@ -97,6 +105,25 @@ export async function fetchAverageRatingsByBook(): Promise<
   });
 
   return averages;
+}
+
+export async function fetchPostById(
+  postId: string,
+  currentUserId?: string | null
+): Promise<Post | null> {
+  const { data, error } = await supabase
+    .from("posts")
+    .select(POST_SELECT_COLUMNS)
+    .eq("id", postId)
+    .single();
+
+  if (error) {
+    console.error("fetchPostById error:", error.message, error.details, error.hint, error.code);
+    return null;
+  }
+  if (!data) return null;
+
+  return mapPost(data as unknown as PostRow, currentUserId);
 }
 
 export async function createPost({

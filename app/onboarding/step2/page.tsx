@@ -69,7 +69,7 @@ export default function Step2Page() {
           priority
         />
 
-        <h1 className="absolute left-[110px] top-[113px] whitespace-pre-line text-center text-[20px] font-bold leading-[26px] text-[#795121]">
+        <h1 className="absolute left-[110px] top-[113px] whitespace-pre-line text-center text-[22px] font-bold leading-[26px] text-[#795121]">
           선택한 책으로 채운{"\n"}피드를 미리 만나보세요
         </h1>
 
@@ -82,7 +82,7 @@ export default function Step2Page() {
           priority
         />
 
-        <p className="absolute left-[100px] top-[166px] text-[15px] text-[#9A9A9A]">
+        <p className="absolute left-[100px] top-[166px] text-[17px] text-[#9A9A9A]">
           이 책들에 대한 이야기들이 모여요.
         </p>
 
@@ -101,11 +101,11 @@ export default function Step2Page() {
                   className="h-[92px] w-[77px] rounded-[4px] object-cover"
                 />
 
-                <p className="mt-[6px] w-[77px] truncate text-center text-[14px] font-normal text-black">
+                <p className="mt-[6px] w-[77px] truncate text-center text-[16px] font-normal text-black">
                   {book.title}
                 </p>
 
-                <p className="mt-[2px] w-[77px] truncate text-center text-[10px] font-normal text-[#9A9A9A]">
+                <p className="mt-[2px] w-[77px] truncate text-center text-[12px] font-normal text-[#9A9A9A]">
                   {book.author}
                 </p>
               </div>
@@ -115,7 +115,7 @@ export default function Step2Page() {
 
         <button
           onClick={() => setIsExpanded((prev) => !prev)}
-          className="absolute left-[14px] z-30 flex h-[44px] w-[374px] cursor-pointer items-center justify-center gap-[10px] rounded-b-[10px] bg-[#E0E0E0] text-[14px] font-normal text-black transition-transform active:scale-[0.98]"
+          className="absolute left-[14px] z-30 flex h-[44px] w-[374px] cursor-pointer items-center justify-center gap-[10px] rounded-b-[10px] bg-[#E0E0E0] text-[16px] font-normal text-black transition-transform active:scale-[0.98]"
           style={{ top: `${toggleButtonTop}px` }}
         >
           {isExpanded ? "접기" : "선택한 책 모두 보기"}
@@ -150,7 +150,7 @@ export default function Step2Page() {
 
         <button
           onClick={() => router.push("/onboarding/step3")}
-          className="absolute left-[14px] top-[776px] z-40 flex h-[59px] w-[374px] cursor-pointer items-center justify-center rounded-[8px] bg-[#FFBA1A] text-[16px] font-normal text-white transition-transform active:scale-[0.98]"
+          className="absolute left-[14px] top-[776px] z-40 flex h-[59px] w-[374px] cursor-pointer items-center justify-center rounded-[8px] bg-[#FFBA1A] text-[18px] font-normal text-white transition-transform active:scale-[0.98]"
         >
           시작하기
         </button>

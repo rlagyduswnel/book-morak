@@ -3,14 +3,8 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-
-type Book = {
-  isbn13: string;
-  title: string;
-  author: string;
-  genre: string;
-  cover: string;
-};
+import { Book } from "@/components/PostCard";
+import { parseCSV } from "@/lib/parseCSV";
 
 const genres = [
   { id: "all", label: "전체", x: 14, w: 46 },
@@ -19,31 +13,6 @@ const genres = [
   { id: "인문학", label: "인문학", x: 192, w: 59 },
   { id: "자기계발", label: "자기계발", x: 260, w: 72 },
 ];
-
-function parseCSV(csv: string): Book[] {
-  const lines = csv.trim().split(/\r?\n/);
-  const headers = lines[0].split(",").map((h) => h.trim());
-
-  return lines.slice(1).map((line) => {
-    const values =
-      line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map((v) =>
-        v.replace(/^"|"$/g, "").trim()
-      ) ?? [];
-
-    const row: Record<string, string> = {};
-    headers.forEach((header, index) => {
-      row[header] = values[index] ?? "";
-    });
-
-    return {
-      isbn13: row.isbn13,
-      title: row.title,
-      author: row.author,
-      genre: row.genre,
-      cover: row.cover,
-    };
-  });
-}
 
 export default function BooksPage() {
   const router = useRouter();
@@ -117,7 +86,7 @@ export default function BooksPage() {
           priority
         />
 
-        <h1 className="absolute left-[84px] top-[113px] text-[20px] font-bold text-[#795121]">
+        <h1 className="absolute left-[84px] top-[113px] text-[22px] font-bold text-[#795121]">
           관심 있는 책을 선택해주세요
         </h1>
 
@@ -130,12 +99,12 @@ export default function BooksPage() {
           priority
         />
 
-        <p className="absolute left-[142px] top-[143px] text-[15px] text-[#9A9A9A]">
+        <p className="absolute left-[142px] top-[143px] text-[17px] text-[#9A9A9A]">
           최소 <span className="text-[#FFBA1A]">2권</span> 이상 선택
         </p>
 
-        <div className="absolute left-[14px] top-[172px] h-[40px] w-[374px] rounded-[10px] border border-[#FFBA1A] bg-white">
-          <button className="absolute left-[11px] top-[11px] cursor-pointer transition-transform active:scale-[0.98]">
+        <div className="absolute left-[14px] top-[172px] h-[52px] w-[374px] rounded-[10px] border border-[#FFBA1A] bg-white">
+          <button className="absolute left-[11px] top-1/2 -translate-y-1/2 cursor-pointer transition-transform active:scale-[0.98]">
             <Image src="/images/onboarding/Q.svg" alt="" width={18} height={18} priority />
           </button>
 
@@ -143,7 +112,7 @@ export default function BooksPage() {
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             placeholder="책 제목, 저자 검색"
-            className="absolute left-[41px] top-[9px] w-[310px] bg-transparent text-[14px] text-[#795121] outline-none placeholder:text-[#9A9A9A]"
+            className="absolute left-[41px] top-1/2 h-[24px] w-[310px] -translate-y-1/2 bg-transparent text-[17px] text-[#795121] outline-none placeholder:text-[#9A9A9A]"
           />
         </div>
 
@@ -155,7 +124,7 @@ export default function BooksPage() {
               key={genre.id}
               onClick={() => setSelectedGenre(genre.id)}
               style={{ left: genre.x, width: genre.w }}
-              className={`absolute top-[228px] h-[25px] cursor-pointer rounded-[41px] text-[14px] transition-transform active:scale-[0.98] ${
+              className={`absolute top-[240px] h-[25px] cursor-pointer rounded-[41px] text-[16px] transition-transform active:scale-[0.98] ${
                 selected
                   ? "bg-[#FFBA1A] text-white"
                   : "border border-[#E0E0E0] bg-white text-[#9A9A9A]"
@@ -166,11 +135,11 @@ export default function BooksPage() {
           );
         })}
 
-        <p className="absolute left-[325px] top-[269px] text-[12px] text-[#9A9A9A]">
+        <p className="absolute left-[325px] top-[281px] text-[13px] text-[#9A9A9A]">
           <span className="text-[#FFBA1A]">{selectedBooks.length}</span>권 선택중
         </p>
 
-        <div className="hide-scrollbar absolute left-[14px] top-[287px] h-[479px] w-[374px] overflow-y-auto overflow-x-hidden">
+        <div className="hide-scrollbar absolute left-[14px] top-[299px] h-[467px] w-[374px] overflow-y-auto overflow-x-hidden">
           <div className="flex w-[374px] flex-col gap-[7px]">
             {filteredBooks.map((book) => {
               const selected = selectedBooks.includes(book.isbn13);
@@ -187,15 +156,15 @@ export default function BooksPage() {
                     className="absolute left-[11px] top-[8px] h-[64px] w-[47px] rounded-[4px] object-cover"
                   />
 
-                  <p className="absolute left-[73px] top-[12.5px] w-[230px] truncate text-[14px] text-black">
+                  <p className="absolute left-[73px] top-[12.5px] w-[230px] truncate text-[16px] text-black">
                     {book.title}
                   </p>
 
-                  <p className="absolute left-[73px] top-[34px] w-[230px] truncate text-[10px] text-[#9A9A9A]">
+                  <p className="absolute left-[73px] top-[34px] w-[230px] truncate text-[12px] text-[#9A9A9A]">
                     {book.author}
                   </p>
 
-                  <p className="absolute left-[73px] top-[51px] w-[230px] truncate text-[10px] text-[#9A9A9A]">
+                  <p className="absolute left-[73px] top-[51px] w-[230px] truncate text-[12px] text-[#9A9A9A]">
                     {book.genre}
                   </p>
 
@@ -219,7 +188,7 @@ export default function BooksPage() {
         <button
           onClick={handleComplete}
           disabled={!isCompleteActive}
-          className={`absolute left-[14px] top-[776px] flex h-[59px] w-[374px] items-center justify-center rounded-[8px] text-[16px] text-white transition-transform ${
+          className={`absolute left-[14px] top-[776px] flex h-[59px] w-[374px] items-center justify-center rounded-[8px] text-[18px] text-white transition-transform ${
             isCompleteActive
               ? "cursor-pointer bg-[#FFBA1A] active:scale-[0.98]"
               : "cursor-default bg-[#9A9A9A]"

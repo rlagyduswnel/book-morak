@@ -49,8 +49,9 @@ export default function WritePage() {
     if (!canSubmit || !book) return;
 
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user ?? null;
 
     if (!user) {
       router.push("/login");
@@ -90,7 +91,7 @@ export default function WritePage() {
             />
           </button>
 
-          <h1 className="pointer-events-none absolute bottom-0 left-0 w-full text-center text-[18px] font-bold leading-[24px] text-black">
+          <h1 className="pointer-events-none absolute bottom-0 left-0 w-full text-center text-[20px] font-bold leading-[24px] text-black">
             게시글 작성하기
           </h1>
         </header>
@@ -104,17 +105,17 @@ export default function WritePage() {
                 className="absolute left-[20px] top-1/2 h-[34px] w-[21px] -translate-y-1/2 object-cover"
               />
 
-              <p className="absolute left-[51px] top-[8px] w-[290px] truncate text-[13.5px] font-normal text-black">
+              <p className="absolute left-[51px] top-[8px] w-[290px] truncate text-[16px] font-normal text-black">
                 {book.title}
               </p>
 
-              <p className="absolute left-[51px] top-[27px] w-[290px] truncate text-[10px] font-normal text-[#9A9A9A]">
+              <p className="absolute left-[51px] top-[27px] w-[290px] truncate text-[12px] font-normal text-[#9A9A9A]">
                 {book.author}
               </p>
             </button>
           )}
 
-          <p className="mt-[15px] text-[14px] font-normal text-[#9A9A9A]">
+          <p className="mt-[15px] text-[16px] font-normal text-[#9A9A9A]">
             이 책은 어떠셨나요?
           </p>
 
@@ -144,20 +145,20 @@ export default function WritePage() {
               })}
             </div>
 
-            <p className="ml-auto text-[20px] font-normal text-[#FFBA1A]">
+            <p className="ml-auto text-[22px] font-normal text-[#FFBA1A]">
               {rating} / 5
             </p>
           </div>
 
-          <p className="mt-[15px] text-[10px] font-normal text-[#9A9A9A]">
+          <p className="mt-[15px] text-[12px] font-normal text-[#9A9A9A]">
             별점을 탭 해주세요.
           </p>
 
           <div className="mt-[15px] rounded-[8px] bg-[#FAFAFA] p-[5px]">
-            <p className="text-[10px] font-normal text-[#9A9A9A]">
+            <p className="text-[12px] font-normal text-[#9A9A9A]">
               리뷰 작성 가이드
             </p>
-            <p className="mt-[5px] whitespace-pre-line text-[10px] font-normal leading-[16px] text-[#9A9A9A]">
+            <p className="mt-[5px] whitespace-pre-line text-[12px] font-normal leading-[16px] text-[#9A9A9A]">
               - 다른 사용자를 존중하는 표현을 사용해주세요.{"\n"}- 스포일러가 될 수 있는 내용은 주의해주세요.{"\n"}- 부적절한 내용은 사전 안내 없이 삭제 될 수 있습니다.
             </p>
           </div>
@@ -169,15 +170,15 @@ export default function WritePage() {
               placeholder={
                 "이 책을 읽으며 떠오른 질문, 감상,\n남기고 싶은 문장을 자유롭게 적어보세요."
               }
-              className="h-[200px] w-full resize-none bg-transparent text-[13px] font-normal leading-[20px] text-black outline-none placeholder:text-[#9A9A9A]"
+              className="h-[200px] w-full resize-none bg-transparent text-[14px] font-normal leading-[20px] text-black outline-none placeholder:text-[#9A9A9A]"
             />
 
-            <p className="absolute bottom-[10px] right-[10px] text-[10px] font-normal text-[#9A9A9A]">
+            <p className="absolute bottom-[10px] right-[10px] text-[12px] font-normal text-[#9A9A9A]">
               {content.length}/1000
             </p>
           </div>
 
-          <p className="mt-0 text-[10px] font-normal text-[#9A9A9A]">
+          <p className="mt-0 text-[12px] font-normal text-[#9A9A9A]">
             최소 30자, 최대 1,000자까지 입력할 수 있습니다. (띄어쓰기 포함)
           </p>
         </section>
@@ -185,7 +186,7 @@ export default function WritePage() {
         <button
           disabled={!canSubmit}
           onClick={handleSubmit}
-          className={`absolute left-[14px] top-[795px] flex h-[52px] w-[374px] items-center justify-center rounded-[8px] text-[16px] font-normal text-white transition-transform ${
+          className={`absolute left-[14px] top-[788px] flex h-[59px] w-[374px] items-center justify-center rounded-[8px] text-[18px] font-normal text-white transition-transform ${
             canSubmit
               ? "cursor-pointer bg-[#FFBA1A] active:scale-[0.98]"
               : "cursor-not-allowed bg-[#9A9A9A]"
@@ -197,21 +198,21 @@ export default function WritePage() {
         {showExitModal && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 px-[34px]">
             <div className="w-full rounded-[16px] bg-white p-[20px]">
-              <p className="text-center text-[16px] font-normal leading-[24px] text-black">
+              <p className="text-center text-[18px] font-normal leading-[24px] text-black">
                 작성 중인 내용이 저장되지 않습니다.
               </p>
 
               <div className="mt-[20px] flex gap-[10px]">
                 <button
                   onClick={() => setShowExitModal(false)}
-                  className="flex h-[44px] flex-1 cursor-pointer items-center justify-center rounded-[8px] border border-[#E0E0E0] text-[14px] font-normal text-black transition-transform active:scale-[0.98]"
+                  className="flex h-[44px] flex-1 cursor-pointer items-center justify-center rounded-[8px] border border-[#E0E0E0] text-[16px] font-normal text-black transition-transform active:scale-[0.98]"
                 >
                   취소
                 </button>
 
                 <button
                   onClick={() => router.back()}
-                  className="flex h-[44px] flex-1 cursor-pointer items-center justify-center rounded-[8px] bg-[#FFBA1A] text-[14px] font-normal text-white transition-transform active:scale-[0.98]"
+                  className="flex h-[44px] flex-1 cursor-pointer items-center justify-center rounded-[8px] bg-[#FFBA1A] text-[16px] font-normal text-white transition-transform active:scale-[0.98]"
                 >
                   나가기
                 </button>

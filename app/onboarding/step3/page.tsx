@@ -79,11 +79,11 @@ export default function Step3Page() {
           priority
         />
 
-        <h1 className="absolute left-[70px] top-[282px] whitespace-pre-line text-[25px] font-bold leading-[35px] tracking-[0.02em] text-black">
+        <h1 className="absolute left-[70px] top-[282px] whitespace-pre-line text-[27px] font-bold leading-[35px] tracking-[0.02em] text-black">
           <span className="text-[#FFBA1A]">책</span>모락에서{"\n"}계속 이야기 나눠볼까요?
         </h1>
 
-        <p className="absolute left-[70px] top-[362px] whitespace-pre-line text-[15px] leading-[18px] tracking-[0.02em] text-[#9A9A9A]">
+        <p className="absolute left-[70px] top-[362px] whitespace-pre-line text-[17px] leading-[18px] tracking-[0.02em] text-[#9A9A9A]">
           관심있는 책을 선택하고{"\n"}나만의 책 피드를 만들어보세요.
         </p>
 
@@ -120,7 +120,7 @@ export default function Step3Page() {
         <button
           disabled={!canSignUp}
           onClick={() => router.push("/signup")}
-            className={`absolute left-[14px] top-[695px] flex h-[52px] w-[374px] items-center justify-center rounded-[8px] border text-[15px] font-bold transition-transform
+            className={`absolute left-[14px] top-[688px] flex h-[59px] w-[374px] items-center justify-center rounded-[8px] border text-[18px] font-bold transition-transform
          ${
            canSignUp
               ? "cursor-pointer border-[#FFBA1A] bg-[#FFBA1A] text-white active:scale-[0.98]"
@@ -133,15 +133,15 @@ export default function Step3Page() {
         {modalType && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 px-[24px]">
             <div className="relative h-[620px] w-full rounded-[16px] bg-white p-[20px]">
-              <h2 className="text-[18px] font-bold text-black">{modalTitle}</h2>
+              <h2 className="text-[20px] font-bold text-black">{modalTitle}</h2>
 
-              <div className="hide-scrollbar mt-[16px] h-[510px] overflow-y-auto whitespace-pre-wrap text-[12px] leading-[20px] text-[#555555]">
+              <div className="hide-scrollbar mt-[16px] h-[510px] overflow-y-auto whitespace-pre-wrap text-[13px] leading-[20px] text-[#555555]">
                 {modalContent}
               </div>
 
               <button
                 onClick={() => setModalType(null)}
-                className="absolute bottom-[16px] left-[20px] flex h-[42px] w-[315px] cursor-pointer items-center justify-center rounded-[8px] bg-[#FFBA1A] text-[15px] text-white transition-transform active:scale-[0.98]"
+                className="absolute bottom-[16px] left-[20px] flex h-[42px] w-[315px] cursor-pointer items-center justify-center rounded-[8px] bg-[#FFBA1A] text-[17px] text-white transition-transform active:scale-[0.98]"
               >
                 닫기
               </button>
@@ -184,7 +184,7 @@ function AgreementRow({
         )}
       </button>
 
-      <span className="ml-[8px] whitespace-nowrap text-[14px] leading-[18px] text-[#9A9A9A]">
+      <span className="ml-[8px] whitespace-nowrap text-[16px] leading-[18px] text-[#9A9A9A]">
         {label}
       </span>
 
@@ -194,7 +194,7 @@ function AgreementRow({
             e.stopPropagation();
             onLinkClick?.();
           }}
-          className="ml-[4px] cursor-pointer whitespace-nowrap text-[14px] leading-[18px] text-[#9A9A9A] transition-transform active:scale-[0.98]"
+          className="ml-[4px] cursor-pointer whitespace-nowrap text-[16px] leading-[18px] text-[#9A9A9A] transition-transform active:scale-[0.98]"
         >
           {linkText}
         </button>

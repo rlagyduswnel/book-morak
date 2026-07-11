@@ -64,13 +64,13 @@ export default function WriteBookSelectPage() {
           </button>
 
           <h1
-            className="pointer-events-none absolute bottom-0 left-0 w-full text-center text-[18px] leading-[24px] font-bold"
+            className="pointer-events-none absolute bottom-0 left-0 w-full text-center text-[20px] font-bold leading-[24px]"
           >
             작성할 책 선택
           </h1>
         </header>
 
-        <div className="absolute left-[14px] top-[115px] h-[40px] w-[374px] rounded-[10px] border border-[#FFBA1A] bg-white">
+        <div className="absolute left-[14px] top-[115px] h-[52px] w-[374px] rounded-[10px] border border-[#FFBA1A] bg-white">
           <Image
             src="/images/onboarding/Q.svg"
             alt=""
@@ -84,11 +84,11 @@ export default function WriteBookSelectPage() {
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             placeholder="검색어를 입력해 주세요."
-            className="absolute left-[41px] top-1/2 h-[24px] w-[310px] -translate-y-1/2 bg-transparent text-[14px] font-normal text-black outline-none placeholder:text-[#9A9A9A]"
+            className="absolute left-[41px] top-1/2 h-[24px] w-[310px] -translate-y-1/2 bg-transparent text-[17px] font-normal text-black outline-none placeholder:text-[#9A9A9A]"
           />
         </div>
 
-        <section className="hide-scrollbar absolute left-[14px] top-[170px] h-[690px] w-[374px] overflow-y-auto overflow-x-hidden">
+        <section className="hide-scrollbar absolute left-[14px] top-[182px] h-[678px] w-[374px] overflow-y-auto overflow-x-hidden">
           <div className="flex flex-col gap-[15px]">
             {filteredBooks.map((book) => (
               <button
@@ -103,11 +103,11 @@ export default function WriteBookSelectPage() {
                 />
 
                 <div className="absolute left-[101px] top-1/2 flex -translate-y-1/2 flex-col gap-[8px]">
-                  <p className="w-[240px] truncate text-[14px] font-normal text-black">
+                  <p className="w-[240px] truncate text-[16px] font-normal text-black">
                     {book.title}
                   </p>
 
-                  <p className="w-[240px] truncate text-[10px] font-normal text-[#9A9A9A]">
+                  <p className="w-[240px] truncate text-[12px] font-normal text-[#9A9A9A]">
                     {book.author}
                   </p>
 
@@ -115,15 +115,15 @@ export default function WriteBookSelectPage() {
                     <Image
                       src="/images/home/starb.svg"
                       alt=""
-                      width={10}
-                      height={10}
+                      width={12}
+                      height={12}
                     />
-                    <span className="text-[10px] font-normal text-black">
+                    <span className="text-[12px] font-normal text-black">
                       {getAverageRating(book.isbn13)}
                     </span>
                   </div>
 
-                  <p className="w-fit rounded-[5px] border border-[#E0E0E0] px-[6px] py-[2px] text-[10px] font-normal text-[#9A9A9A]">
+                  <p className="w-fit rounded-[5px] border border-[#E0E0E0] px-[6px] py-[2px] text-[12px] font-normal text-[#9A9A9A]">
                     {book.genre}
                   </p>
                 </div>

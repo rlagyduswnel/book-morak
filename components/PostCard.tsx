@@ -12,6 +12,7 @@ export type Book = {
   author: string;
   genre: string;
   cover: string;
+  description: string;
 };
 
 export type Post = {
@@ -36,6 +37,10 @@ type PostCardProps = {
   /** 이 계정이 이 게시글을 이미 좋아요 눌렀는지 (부모에서 미리 조회해 전달) */
   initiallyLiked?: boolean;
   onDelete?: (postId: string) => void;
+  /** false면 카드 상단의 책 정보(표지/제목/저자) 블록을 숨겨요. 기본값 true. */
+  showBookInfo?: boolean;
+  /** true면 본문을 자르지 않고 전부 보여주고 '더보기'도 없어요 (게시글 상세페이지용). */
+  fullContent?: boolean;
   /**
    * true(기본값): 홈 등에서 쓰는 완전 인터랙티브 카드
    * false: 온보딩 등에서 쓰는 미리보기 카드
@@ -62,6 +67,8 @@ export default function PostCard({
   currentUserId,
   initiallyLiked = false,
   onDelete,
+  showBookInfo = true,
+  fullContent = false,
   interactive = true,
 }: PostCardProps) {
   const router = useRouter();
@@ -109,6 +116,7 @@ export default function PostCard({
   return (
     <article className="relative w-[374px] border-b border-[#E0E0E0] px-[5px] py-[10px]">
       {/* 책 정보 */}
+      {showBookInfo && (
       <button
         type="button"
         onClick={
@@ -129,11 +137,11 @@ export default function PostCard({
           className="absolute left-[20px] top-1/2 h-[34px] w-[21px] -translate-y-1/2 object-cover"
         />
 
-        <p className="absolute left-[51px] top-[8px] w-[250px] truncate text-[13.5px] font-normal text-black">
+        <p className="absolute left-[51px] top-[8px] w-[250px] truncate text-[16px] font-normal text-black">
           {book.title}
         </p>
 
-        <p className="absolute left-[51px] top-[27px] w-[250px] truncate text-[10px] font-normal text-[#9A9A9A]">
+        <p className="absolute left-[51px] top-[27px] w-[250px] truncate text-[12px] font-normal text-[#9A9A9A]">
           {book.author}
         </p>
 
@@ -145,16 +153,21 @@ export default function PostCard({
           className="absolute right-[20px] top-1/2 -translate-y-1/2"
         />
       </button>
+      )}
 
       {/* 작성자 정보 */}
-      <div className="relative mt-[10px] flex h-[22px] w-full items-center">
+      <div
+        className={`relative flex h-[28px] w-full items-center ${
+          showBookInfo ? "mt-[10px]" : "mt-0"
+        }`}
+      >
         <img
           src={post.authorImage || "/images/home/normal.svg"}
           alt=""
-          className="h-[22px] w-[22px] rounded-full object-cover"
+          className="h-[28px] w-[28px] rounded-full object-cover"
         />
 
-        <span className="ml-[5px] text-[12px] font-normal text-black">
+        <span className="ml-[5px] text-[14px] font-normal text-black">
           {post.authorName}
         </span>
 
@@ -168,8 +181,8 @@ export default function PostCard({
                   : "/images/home/stara.svg"
               }
               alt=""
-              width={12}
-              height={12}
+              width={14}
+              height={14}
             />
           ))}
         </div>
@@ -203,14 +216,14 @@ export default function PostCard({
               <>
                 <button
                   onClick={() => router.push(`/posts/${post.id}/edit`)}
-                  className="h-[34px] w-full cursor-pointer text-[12px] font-normal text-black transition-colors hover:bg-[#FAFAFA]"
+                  className="h-[34px] w-full cursor-pointer text-[13px] font-normal text-black transition-colors hover:bg-[#FAFAFA]"
                 >
                   수정하기
                 </button>
 
                 <button
                   onClick={handleDelete}
-                  className="h-[34px] w-full cursor-pointer border-t border-[#E0E0E0] text-[12px] font-normal text-black transition-colors hover:bg-[#FAFAFA]"
+                  className="h-[34px] w-full cursor-pointer border-t border-[#E0E0E0] text-[13px] font-normal text-black transition-colors hover:bg-[#FAFAFA]"
                 >
                   삭제하기
                 </button>
@@ -218,7 +231,7 @@ export default function PostCard({
             ) : (
               <button
                 onClick={() => setMenuOpened(false)}
-                className="h-[34px] w-full cursor-pointer text-[12px] font-normal text-black transition-colors hover:bg-[#FAFAFA]"
+                className="h-[34px] w-full cursor-pointer text-[13px] font-normal text-black transition-colors hover:bg-[#FAFAFA]"
               >
                 신고하기
               </button>
@@ -236,13 +249,13 @@ export default function PostCard({
             : undefined
         }
         tabIndex={interactive ? 0 : -1}
-        className={`mt-[10px] w-full text-left text-[14px] font-normal leading-[21px] text-black ${
+        className={`mt-[10px] w-full text-left text-[16px] font-normal leading-[21px] text-black ${
           interactive ? "cursor-pointer" : "cursor-default"
         }`}
       >
-        {shortenedContent}
+        {fullContent ? post.content : shortenedContent}
 
-        {isLongContent && (
+        {!fullContent && isLongContent && (
           <span className="font-normal text-[#9A9A9A]">
             ... 더보기
           </span>
@@ -250,7 +263,7 @@ export default function PostCard({
       </button>
 
       {/* 게시글 정보 */}
-      <div className="relative mt-[10px] h-[12px] w-full">
+      <div className="relative mt-[10px] h-[16px] w-full">
         {interactive ? (
           <button
             type="button"
@@ -264,21 +277,21 @@ export default function PostCard({
                   : "/images/home/heart.svg"
               }
               alt=""
-              width={12}
-              height={12}
+              width={16}
+              height={16}
             />
           </button>
         ) : (
           <Image
             src="/images/home/heart.svg"
             alt=""
-            width={12}
-            height={12}
+            width={16}
+            height={16}
             className="absolute left-0 top-1/2 -translate-y-1/2"
           />
         )}
 
-        <p className="absolute left-[17px] top-1/2 -translate-y-1/2 text-[11px] font-normal text-[#9A9A9A]">
+        <p className="absolute left-[21px] top-1/2 -translate-y-1/2 text-[14px] font-normal text-[#9A9A9A]">
           {formatCount(likeCount)}
         </p>
 
@@ -290,7 +303,7 @@ export default function PostCard({
               : undefined
           }
           tabIndex={interactive ? 0 : -1}
-          className={`absolute left-[54px] top-1/2 flex -translate-y-1/2 items-center ${
+          className={`absolute left-[64px] top-1/2 flex -translate-y-1/2 items-center ${
             interactive
               ? "cursor-pointer transition-transform active:scale-[0.98]"
               : "cursor-default"
@@ -299,16 +312,16 @@ export default function PostCard({
           <Image
             src="/images/home/chat.svg"
             alt=""
-            width={12}
-            height={12}
+            width={16}
+            height={16}
           />
         </button>
 
-        <p className="absolute left-[71px] top-1/2 -translate-y-1/2 text-[11px] font-normal text-[#9A9A9A]">
+        <p className="absolute left-[85px] top-1/2 -translate-y-1/2 text-[14px] font-normal text-[#9A9A9A]">
           {formatCount(post.commentCount)}
         </p>
 
-        <p className="absolute right-0 top-1/2 -translate-y-1/2 text-[11px] font-normal text-[#9A9A9A]">
+        <p className="absolute right-0 top-1/2 -translate-y-1/2 text-[14px] font-normal text-[#9A9A9A]">
           {post.date}
         </p>
       </div>
