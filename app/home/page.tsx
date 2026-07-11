@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { fetchFollowedBookIds } from "@/lib/follows";
 import { fetchPostsByBookIds } from "@/lib/posts";
 import { fetchLikedPostIds } from "@/lib/likes";
+import { fetchNotificationCount } from "@/lib/notifications";
 
 export default function HomePage() {
   const router = useRouter();
@@ -17,6 +18,8 @@ export default function HomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [likedPostIds, setLikedPostIds] = useState<string[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
+  const [followingCount, setFollowingCount] = useState<number | null>(null);
+  const [hasNotifications, setHasNotifications] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -35,16 +38,20 @@ export default function HomePage() {
       if (!isMounted) return;
       setUserId(user.id);
 
-      const [followedBookIds, likedIds, csv] = await Promise.all([
-        fetchFollowedBookIds(user.id),
-        fetchLikedPostIds(user.id),
-        fetch("/data/books.csv").then((res) => res.text()),
-      ]);
+      const [followedBookIds, likedIds, csv, notificationCount] =
+        await Promise.all([
+          fetchFollowedBookIds(user.id),
+          fetchLikedPostIds(user.id),
+          fetch("/data/books.csv").then((res) => res.text()),
+          fetchNotificationCount(user.id),
+        ]);
 
       if (!isMounted) return;
 
       setBooks(parseCSV(csv));
       setLikedPostIds(likedIds);
+      setFollowingCount(followedBookIds.length);
+      setHasNotifications(notificationCount > 0);
 
       const fetchedPosts = await fetchPostsByBookIds(
         followedBookIds,
@@ -95,29 +102,62 @@ export default function HomePage() {
               width={16}
               height={18}
             />
+
+            {hasNotifications && (
+              <span className="absolute right-[-2px] top-[-2px] h-[8px] w-[8px] rounded-full bg-[#FFBA1A]" />
+            )}
           </button>
         </header>
 
-        <section className="hide-scrollbar absolute left-[14px] top-[115px] h-[678px] w-[374px] overflow-y-auto overflow-x-hidden">
-          <div className="flex flex-col gap-[15px]">
-            {posts.map((post) => {
-              const book = getBook(post.bookId);
+        {followingCount === 0 ? (
+          <div className="absolute left-[14px] top-[115px] flex h-[678px] w-[374px] flex-col items-center justify-center">
+            <Image
+              src="/images/home/sleep.svg"
+              alt=""
+              width={180}
+              height={180}
+              priority
+            />
 
-              if (!book) return null;
+            <p className="mt-[15px] text-[20px] font-bold text-black">
+              아직 선택한 책이 없어요
+            </p>
 
-              return (
-                <PostCard
-                  key={post.id}
-                  post={post}
-                  book={book}
-                  currentUserId={userId}
-                  initiallyLiked={likedPostIds.includes(post.id)}
-                  onDelete={handleDeletePost}
-                />
-              );
-            })}
+            <p className="mt-[8px] text-center text-[16px] leading-[22px] text-[#9A9A9A]">
+              관심 있는 책을 팔로우하고
+              <br />
+              맞춤 게시물을 만나보세요.
+            </p>
+
+            <button
+              onClick={() => router.push("/explore")}
+              className="mt-[24px] flex h-[52px] w-[200px] cursor-pointer items-center justify-center rounded-[8px] bg-[#FFBA1A] text-[16px] font-bold text-white transition-transform active:scale-[0.98]"
+            >
+              책 둘러보기
+            </button>
           </div>
-        </section>
+        ) : (
+          <section className="hide-scrollbar absolute left-[14px] top-[115px] h-[678px] w-[374px] overflow-y-auto overflow-x-hidden">
+            <div className="flex flex-col gap-[15px]">
+              {posts.map((post) => {
+                const book = getBook(post.bookId);
+
+                if (!book) return null;
+
+                return (
+                  <PostCard
+                    key={post.id}
+                    post={post}
+                    book={book}
+                    currentUserId={userId}
+                    initiallyLiked={likedPostIds.includes(post.id)}
+                    onDelete={handleDeletePost}
+                  />
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         <nav className="absolute bottom-0 left-0 h-[80px] w-[402px] border-t border-[#E0E0E0] bg-white px-[22px] pb-[24px] pt-[16px]">
           <div className="flex items-start gap-[70px]">

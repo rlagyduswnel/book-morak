@@ -129,6 +129,31 @@ export async function updatePassword({
   if (error) throw error;
 }
 
+export async function deleteAccount() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) {
+    throw new Error("로그인 정보가 없습니다.");
+  }
+
+  const response = await fetch("/api/delete-account", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+    },
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.error ?? "계정 삭제에 실패했습니다.");
+  }
+
+  await supabase.auth.signOut();
+}
+
 export async function signOut() {
   await supabase.auth.signOut();
 }

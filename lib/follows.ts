@@ -15,7 +15,8 @@ export async function fetchFollowedBookIds(userId: string): Promise<string[]> {
   const { data, error } = await supabase
     .from("follows")
     .select("book_id")
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
 
   if (error || !data) return [];
 
