@@ -19,7 +19,9 @@ export default function MobileFrameScaler({
       const heightScale = window.innerHeight / FRAME_HEIGHT;
       // 화면이 프레임보다 작을 때만 줄이고, 데스크탑처럼 큰 화면에서는
       // 원래 크기(1배) 그대로 두어요.
-      setScale(Math.min(1, widthScale, heightScale));
+      // 양옆(또는 위아래) 여백을 살짝 줄이기 위해 약간만 더 확대해요.
+      const rawScale = Math.min(widthScale, heightScale);
+      setScale(Math.min(1, rawScale * 1.05));
     };
 
     updateScale();
@@ -39,7 +41,7 @@ export default function MobileFrameScaler({
         width: "100vw",
         height: "100dvh",
         display: "flex",
-        alignItems: "center",
+        alignItems: "flex-start",
         justifyContent: "center",
         overflow: "hidden",
         background: "#ffffff",
