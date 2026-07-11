@@ -52,7 +52,7 @@ export default function MobileFrameScaler({
           width: `${FRAME_WIDTH}px`,
           height: `${FRAME_HEIGHT}px`,
           transform: `scale(${scale})`,
-          transformOrigin: "center center",
+          transformOrigin: "top center",
           flexShrink: 0,
         }}
       >
