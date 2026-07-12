@@ -109,7 +109,7 @@ export default function EmailSignupPage() {
 
         {showToast && (
           <div className="absolute left-[24px] top-[724px] z-30 flex h-[48px] w-[355px] items-center justify-center rounded-[24px] bg-black/75 text-[13px] text-white">
-            인증 메일이 전송되었습니다.
+            이메일이 확인되었습니다.
           </div>
         )}
 
@@ -128,7 +128,7 @@ export default function EmailSignupPage() {
               : "cursor-not-allowed bg-[#9A9A9A]"
           }`}
         >
-          {sent ? "인증 메일 확인 완료" : "인증 메일 보내기"}
+          {sent ? "이메일 확인 완료" : "이메일 확인하기"}
         </button>
       </section>
     </main>
